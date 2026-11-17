@@ -1,853 +1,1069 @@
 
 "use client";
 
-import { useState, type FormEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 
-type UserInfo = {
-  name: string;
-  contact: string;
-  company: string;
-  business: string;
-  topic: string;
+type Profile = {
+  fullName: string;
+  phone: string;
+  email: string;
+  companyName: string;
+  organizationType: string;
+  jobTitle: string;
+  industry: string;
+  teamSize: string;
+  interest: string;
 };
 
 type Message = {
   id: number;
-  text: string;
-  sender: "user" | "assistant";
-  time: string;
+  role: "user" | "assistant";
+  content: string;
+  time: number;
+};
+
+const emptyProfile: Profile = {
+  fullName: "",
+  phone: "",
+  email: "",
+  companyName: "",
+  organizationType: "",
+  jobTitle: "",
+  industry: "",
+  teamSize: "",
+  interest: "",
 };
 
 const topics = [
-  "مشاوره رایگان",
-  "تلفن ابری",
-  "راه‌اندازی مرکز تماس",
-  "پشتیبانی فنی",
-  "خرید خدمات",
-  "سایر موارد",
-];
-
-const suggestions = [
   {
     icon: "✦",
-    title: "تلفن ابری",
-    description: "آشنایی با تلفن ابری و امکانات آن",
-    question: "تلفن ابری چیست و چه امکاناتی دارد؟",
-  },
-  {
-    icon: "⌘",
-    title: "مرکز تماس",
-    description: "راه‌اندازی مرکز تماس سازمانی",
-    question: "برای راه‌اندازی مرکز تماس به چه امکاناتی نیاز دارم؟",
+    title: "خدمات دال آپس",
+    question: "دال آپس چه خدماتی ارائه می‌ده؟",
+    subtitle: "آشنایی با راهکارها",
   },
   {
     icon: "◈",
-    title: "راهکار کسب‌وکار",
-    description: "انتخاب راهکار مناسب شرکت",
-    question: "برای کسب‌وکار من چه راهکار ارتباطی مناسبه؟",
+    title: "انتخاب پکیج",
+    question: "کدوم پکیج برای شرکت ما مناسبه؟",
+    subtitle: "مقایسه پلن‌ها",
   },
   {
-    icon: "◎",
-    title: "هزینه و تعرفه",
-    description: "بررسی هزینه خدمات و تجهیزات",
-    question: "هزینه راه‌اندازی تلفن ابری چقدر می‌شود؟",
+    icon: "☎",
+    title: "راه‌اندازی VoIP",
+    question: "برای راه‌اندازی VoIP از کجا شروع کنم؟",
+    subtitle: "شروع تلفن سازمانی",
+  },
+  {
+    icon: "⌘",
+    title: "شبکه و سرور",
+    question: "در زمینه شبکه و سرور چه خدماتی دارین؟",
+    subtitle: "بررسی زیرساخت",
   },
 ];
 
-function Icon({
-  name,
-  size = 20,
-}: {
-  name: string;
-  size?: number;
-}) {
-  const common = {
-    width: size,
-    height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.7,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-  };
+const plans = [
+  {
+    name: "پایه",
+    price: "۱۴۹٬۰۰۰",
+    features: "۲۰۰ دقیقه تماس، داشبورد ساده و پشتیبانی تیکتی",
+  },
+  {
+    name: "استاندارد",
+    price: "۲۹۹٬۰۰۰",
+    features: "۶۰۰ دقیقه تماس، شماره اختصاصی و داشبورد آنلاین",
+  },
+  {
+    name: "حرفه‌ای",
+    price: "۴۹۹٬۰۰۰",
+    features: "۱۰۰۰ دقیقه تماس، مرکز تماس و گزارش‌گیری پایه",
+  },
+  {
+    name: "VIP",
+    price: "۹۹۹٬۰۰۰",
+    features: "تماس نامحدود، مرکز تماس پیشرفته، گزارش‌های تحلیلی و مشاوره اختصاصی",
+  },
+];
 
-  switch (name) {
-    case "spark":
-      return (
-        <svg {...common}>
-          <path d="M12 2.5 14.7 9.3 21.5 12l-6.8 2.7L12 21.5l-2.7-6.8L2.5 12l6.8-2.7L12 2.5Z" />
-          <path d="m19 2 .8 2.2L22 5l-2.2.8L19 8l-.8-2.2L16 5l2.2-.8L19 2Z" />
-        </svg>
-      );
-    case "arrow":
-      return (
-        <svg {...common}>
-          <path d="M5 12h14M13 5l7 7-7 7" />
-        </svg>
-      );
-    case "send":
-      return (
-        <svg {...common}>
-          <path d="m22 2-7 20-4-9-9-4 20-7Z" />
-          <path d="M22 2 11 13" />
-        </svg>
-      );
-    case "plus":
-      return (
-        <svg {...common}>
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-      );
-    case "home":
-      return (
-        <svg {...common}>
-          <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1V10Z" />
-        </svg>
-      );
-    case "user":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 21a8 8 0 0 1 16 0" />
-        </svg>
-      );
-    case "message":
-      return (
-        <svg {...common}>
-          <path d="M21 11.5a8.5 8.5 0 0 1-9 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.9-4.6A8.5 8.5 0 1 1 21 11.5Z" />
-        </svg>
-      );
-    case "clock":
-      return (
-        <svg {...common}>
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7v5l3 2" />
-        </svg>
-      );
-    case "shield":
-      return (
-        <svg {...common}>
-          <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" />
-          <path d="m9 12 2 2 4-4" />
-        </svg>
-      );
-    default:
-      return null;
+function answerQuestion(question: string, profile: Profile): string {
+  const q = question
+    .toLowerCase()
+    .replace(/ي/g, "ی")
+    .replace(/ك/g, "ک");
+
+  const company = profile.companyName.trim();
+  const team = profile.teamSize;
+
+  if (
+    /چه خدمات|خدمات.*ارائه|دال آپس چیه|daal ops|دال آپس/.test(q)
+  ) {
+    return `دال آپس روی راهکارهای ارتباطی و زیرساخت کسب‌وکارها تمرکز داره. 👋
+
+☎ تلفن ابری و VoIP
+راهکارهای تماس سازمانی برای مدیریت ارتباطات تلفنی، با امکان استفاده از قابلیت‌های متناسب با پکیج انتخابی.
+
+🎧 مرکز تماس
+مدیریت اپراتورها، صف تماس و گزارش‌گیری برای سامان‌دهی تماس‌های ورودی و خروجی.
+
+🖧 شبکه و سرور
+بررسی نیازهای شبکه، سرور و زیرساخت فنی سازمان.
+
+⚙ DevOps و اتوماسیون
+این حوزه‌ها هم در معرفی کلی دال آپس قرار دارن، ولی جزئیات اجرایی و تعرفه‌شون هنوز در پکیج‌های فعلی مشخص نشده.
+
+📦 پکیج‌های تلفنی
+چهار سطح پایه، استاندارد، حرفه‌ای و VIP در سایت معرفی شده.
+
+اگه بخوای، می‌تونیم اول مشخص کنیم کدوم سرویس با نیاز مجموعه‌ات هماهنگ‌تره.`;
   }
+
+  if (
+    /پکیج|پلن|تعرفه|قیمت|هزینه|خرید|مناسبه|مناسب است/.test(q)
+  ) {
+    let recommendation =
+      "برای انتخاب دقیق‌تر باید تعداد کاربران، حجم تماس و امکانات موردنیاز مشخص بشه.";
+
+    if (team === "1" || team === "2-10") {
+      recommendation =
+        "با توجه به اندازه مجموعه‌ات، پیشنهاد می‌کنم ابتدا پایه و استاندارد رو مقایسه کنیم. اگر شماره اختصاصی می‌خوای، استاندارد مناسب‌تر به نظر می‌رسه.";
+    } else if (team === "11-50") {
+      recommendation =
+        "برای این اندازه مجموعه، استاندارد و حرفه‌ای ارزش بررسی بیشتری دارن؛ مخصوصاً اگر به مرکز تماس یا گزارش‌گیری نیاز داشته باشی.";
+    } else if (team === "51-200" || team === "201+") {
+      recommendation =
+        "برای مجموعه بزرگ‌تر، حرفه‌ای و VIP رو در اولویت بررسی می‌ذارم؛ اما انتخاب نهایی به حجم تماس و ساختار مرکز تماس بستگی داره.";
+    }
+
+    return `حتماً! بیا پکیج‌های دال آپس رو با هم مقایسه کنیم. 📦
+
+${company ? `برای مجموعه «${company}»:\n\n` : ""}${plans
+      .map(
+        (plan) =>
+          `◈ ${plan.name} — ${plan.price} تومان در ماه\n${plan.features}`
+      )
+      .join("\n\n")}
+
+💡 پیشنهاد اولیه من:
+${recommendation}
+
+توجه کن که قیمت‌ها و امکانات بالا از فهرست پکیج‌های فعلی سایت گرفته شدن و قبل از خرید باید تأیید بشن.
+
+برای اینکه دقیق‌تر راهنماییت کنم:
+۱. چند نفر قراره از تلفن استفاده کنن؟
+۲. شماره اختصاصی لازم داری؟
+۳. روزانه حدوداً چند تماس دارین؟`;
+  }
+
+  if (
+    /voip|ویپ|تلفن|سانترال|شماره اختصاصی|راه‌اندازی/.test(q)
+  ) {
+    return `برای راه‌اندازی تلفن سازمانی با VoIP، بهتره مرحله‌به‌مرحله جلو بریم. ☎
+
+۱. بررسی وضعیت فعلی
+اول مشخص می‌کنیم الان از چه سیستم تلفنی استفاده می‌کنی و چند نفر قراره پاسخ‌گوی تماس‌ها باشن.
+
+۲. بررسی اینترنت و شبکه
+کیفیت و پایداری شبکه برای تماس صوتی اهمیت زیادی داره. قبل از انتخاب راهکار باید وضعیت ارتباطی مجموعه بررسی بشه.
+
+۳. مشخص‌کردن امکانات
+مثلاً شماره اختصاصی، داخلی‌های مختلف، صف تماس، مرکز تماس یا گزارش‌گیری.
+
+۴. انتخاب پکیج
+پکیج استاندارد در سایت با شماره اختصاصی معرفی شده و پکیج حرفه‌ای قابلیت مرکز تماس داره. برای نیازهای گسترده‌تر هم VIP قابل بررسیه.
+
+۵. برنامه‌ریزی اجرا
+بعد از مشخص‌شدن نیازها، باید جزئیات فنی و شرایط راه‌اندازی با تیم دال آپس نهایی بشه.
+
+برای شروع، بهم بگو الان مجموعه‌ات تلفن ثابت یا سانترال داره، یا می‌خواین از صفر راه‌اندازی کنین؟`;
+  }
+
+  if (
+    /شبکه|سرور|زیرساخت|فایروال|روتر|سوئیچ|امنیت شبکه/.test(q)
+  ) {
+    return `در حوزه شبکه و سرور، می‌تونیم از بررسی نیازهای زیرساخت مجموعه شروع کنیم. 🖧
+
+چند موضوع مهم وجود داره:
+
+◈ ساختار شبکه داخلی
+تعداد کاربران، تجهیزات، اتصال بخش‌ها و نحوه دسترسی به منابع.
+
+◈ سرورها و سرویس‌ها
+بررسی اینکه سرویس‌های مجموعه روی چه زیرساختی اجرا می‌شن و چه ظرفیت یا پایداری‌ای لازم دارن.
+
+◈ امنیت و دسترسی
+نیاز به مدیریت دسترسی، تفکیک شبکه و بررسی تنظیمات امنیتی.
+
+◈ پایداری و نگهداری
+بررسی نقاط خرابی احتمالی، تهیه نسخه پشتیبان و برنامه نگهداری.
+
+◈ ارتباط با VoIP
+اگر تلفن سازمانی هم داری، باید شرایط شبکه برای انتقال صدای پایدار بررسی بشه.
+
+جزئیات دقیق خدمات شبکه و تعرفه‌ها در پکیج‌های تلفنی سایت مشخص نشده؛ بنابراین نمی‌خوام بدون بررسی، امکاناتی رو قطعی قول بدم.
+
+بهم بگو شبکه‌ات الان راه‌اندازی شده و مشکل داره، یا قراره یک شبکه جدید طراحی بشه؟`;
+  }
+
+  if (/پشتیبانی|تیکت|مشکل فنی|تماس با/.test(q)) {
+    return `برای پشتیبانی دال آپس، در صفحه اصلی سایت بخش «پشتیبانی» در نظر گرفته شده. 🎧
+
+اونجا مسیرهای درخواست پشتیبانی فنی، ثبت تیکت و تماس معرفی شدن.
+
+فقط یک نکته: در نسخه فعلی که داریم تست می‌کنیم، اتصال واقعی سامانه پشتیبانی هنوز تأیید نشده؛ پس ثبت درخواست رو تا زمان فعال‌شدن بک‌اند، قطعی در نظر نگیر.
+
+می‌تونی از بخش پشتیبانی سایت شروع کنی یا همین‌جا نوع مشکلت رو توضیح بدی تا راهنمایی اولیه بدم.`;
+  }
+
+  if (/سلام|درود|خوبی|صبح بخیر|عصر بخیر/.test(q)) {
+    return `سلام ${profile.fullName.trim().split(/\s+/)[0]} جان! 💜
+
+خوشحالم اینجایی. می‌تونیم درباره خدمات دال آپس، پکیج‌ها، تلفن سازمانی یا شبکه و سرور صحبت کنیم.
+
+دوست داری از کدوم موضوع شروع کنیم؟`;
+  }
+
+  return `سؤالت رو دریافت کردم. 💜
+
+فعلاً غلام در حالت آزمایشی کار می‌کنه و برای موضوع‌های اصلی سایت پاسخ‌های آماده و مرتبط داره، نه پاسخ‌گویی آزاد با هوش مصنوعی.
+
+می‌تونم درباره این موضوع‌ها راهنماییت کنم:
+
+• خدمات DAAL OPS
+• مقایسه قیمت و امکانات پکیج‌ها
+• راه‌اندازی تلفن سازمانی و VoIP
+• شبکه و سرور
+• مسیرهای پشتیبانی
+
+اگه سؤالت درباره یکی از این موضوع‌هاست، کمی دقیق‌تر توضیح بده تا پاسخ مرتبط‌تری دریافت کنی.`;
 }
 
-function AssistantAvatar({ large = false }: { large?: boolean }) {
+function Avatar({ large = false }: { large?: boolean }) {
   return (
-    <div
-      className={`assistant-avatar relative flex shrink-0 items-center justify-center rounded-2xl ${
-        large ? "h-16 w-16 rounded-[23px]" : "h-10 w-10"
+    <span
+      aria-hidden="true"
+      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-[20px] border border-violet-300/25 bg-gradient-to-br from-[#8256ff] via-[#5042bd] to-[#168fc1] text-white shadow-[0_12px_30px_rgba(91,65,220,.22)] ${
+        large ? "h-16 w-16 text-3xl" : "h-11 w-11 text-xl"
       }`}
     >
-      <Icon name="spark" size={large ? 31 : 21} />
-      <span className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-[3px] border-[#0b0a1d] bg-emerald-400" />
-    </div>
+      <span className="absolute -right-3 -top-4 h-10 w-10 rounded-full bg-white/15 blur-xl" />
+      <span className="relative font-black">✦</span>
+    </span>
   );
 }
 
-function formatTime() {
-  return new Date().toLocaleTimeString("fa-IR", {
+function InputField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  required?: boolean;
+  type?: string;
+}) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-xs font-medium text-white/75">
+        {label}
+        {required && <span className="text-cyan-300"> *</span>}
+      </span>
+      <input
+        required={required}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        maxLength={120}
+        className="w-full rounded-xl border border-white/10 bg-[#181530] px-3 py-3 text-base text-white outline-none transition placeholder:text-white/30 focus:border-violet-400/60 sm:text-sm"
+      />
+    </label>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-xs font-medium text-white/75">
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-white/10 bg-[#181530] px-3 py-3 text-base text-white outline-none focus:border-violet-400/60 sm:text-sm"
+      >
+        <option value="">انتخاب کن...</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function formatTime(time: number) {
+  return new Date(time).toLocaleTimeString("fa-IR", {
     hour: "2-digit",
     minute: "2-digit",
   });
 }
 
 export default function ConsultationPage() {
-  const [stage, setStage] = useState<"welcome" | "chat">("welcome");
-  const [mobileSidebar, setMobileSidebar] = useState(false);
-
-  const [user, setUser] = useState<UserInfo>({
-    name: "",
-    contact: "",
-    company: "",
-    business: "",
-    topic: "مشاوره رایگان",
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [message, setMessage] = useState("");
-
+  const [form, setForm] = useState<Profile>(emptyProfile);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [error, setError] = useState("");
+  const [draft, setDraft] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const [chatHistory, setChatHistory] = useState<string[]>([
-    "گفت‌وگوی جدید",
-  ]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const nextId = useRef(1);
+  const stickToBottom = useRef(true);
 
-  function updateUser(key: keyof UserInfo, value: string) {
-    setUser((old) => ({ ...old, [key]: value }));
-    setErrors((old) => ({ ...old, [key]: "" }));
+  const firstName =
+    profile?.fullName.trim().split(/\s+/)[0] ?? "دوست من";
+
+  function change<K extends keyof Profile>(
+    field: K,
+    value: Profile[K]
+  ) {
+    setForm((previous) => ({ ...previous, [field]: value }));
   }
 
-  function validateUser() {
-    const next: Record<string, string> = {};
+  function welcomeMessage(data: Profile): Message {
+    const name = data.fullName.trim().split(/\s+/)[0];
+    const company = data.companyName.trim();
 
-    if (user.name.trim().length < 2) {
-      next.name = "نام و نام خانوادگی را وارد کنید.";
-    }
+    return {
+      id: nextId.current++,
+      role: "assistant",
+      content: `سلام ${name} جان! 👋
 
-    const contact = user.contact.trim();
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
-    const isPhone = /^[\d۰-۹٠-٩\s+()-]{7,}$/.test(contact);
+من غلامم، راهنمای خدمات DAAL OPS.
 
-    if (!isEmail && !isPhone) {
-      next.contact = "شماره تماس یا ایمیل معتبر وارد کنید.";
-    }
+${
+  company
+    ? `خوشحالم با مجموعه «${company}» آشنا شدم.`
+    : "خوشحالم باهات آشنا شدم."
+}
 
-    setErrors(next);
-    return Object.keys(next).length === 0;
+اینجا می‌تونیم درباره تلفن سازمانی، خدمات شبکه و سرور یا انتخاب پکیج مناسب صحبت کنیم.
+
+برای شروع، یکی از کارت‌های پیشنهادی رو انتخاب کن یا سؤالت رو پایین صفحه بنویس. 💜`,
+      time: Date.now(),
+    };
   }
 
-  function startChat(event: FormEvent<HTMLFormElement>) {
+  function submitProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError("");
 
-    if (!validateUser()) return;
+    if (form.fullName.trim().length < 2) {
+      setError("نام و نام خانوادگی رو درست وارد کن.");
+      return;
+    }
 
-    setMessages([
-      {
-        id: Date.now(),
-        sender: "assistant",
-        text: `سلام ${user.name.trim()} عزیز! 👋
+    if (!/^[+\d\s()-]{7,20}$/.test(form.phone.trim())) {
+      setError("شماره تماس معتبر وارد کن.");
+      return;
+    }
 
-به فضای مشاوره DAAL OPS خوش اومدی.
+    if (!profile && !consent) {
+      setError("برای ادامه، تأیید استفاده موقت از اطلاعات لازمه.");
+      return;
+    }
 
-اینجا می‌تونی درباره تلفن ابری، راه‌اندازی مرکز تماس، زیرساخت ارتباطی و راهکارهای کسب‌وکارت گفت‌وگو کنی.
+    const saved = {
+      ...form,
+      fullName: form.fullName.trim(),
+      phone: form.phone.trim(),
+    };
 
-از کجا شروع کنیم؟`,
-        time: formatTime(),
-      },
-    ]);
+    setProfile(saved);
+    setEditing(false);
+    setMobileMenuOpen(false);
 
-    setStage("chat");
-    setChatHistory((old) => ["گفت‌وگوی جدید", ...old]);
+    if (messages.length === 0) {
+      setMessages([welcomeMessage(saved)]);
+    }
+
+    stickToBottom.current = true;
   }
 
-  function sendMessage(event?: FormEvent<HTMLFormElement>) {
-    event?.preventDefault();
+  function sendMessage(value = draft) {
+    if (!profile) return;
 
-    const value = message.trim();
-    if (!value) return;
+    const content = value.trim();
+    if (!content) return;
 
-    setMessages((old) => [
-      ...old,
-      {
-        id: Date.now(),
-        sender: "user",
-        text: value,
-        time: formatTime(),
-      },
+    const time = Date.now();
+
+    const userMessage: Message = {
+      id: nextId.current++,
+      role: "user",
+      content,
+      time,
+    };
+
+    const assistantMessage: Message = {
+      id: nextId.current++,
+      role: "assistant",
+      content: answerQuestion(content, profile),
+      time,
+    };
+
+    stickToBottom.current = true;
+
+    setMessages((previous) => [
+      ...previous,
+      userMessage,
+      assistantMessage,
     ]);
 
-    setMessage("");
-  }
-
-  function sendSuggestion(question: string) {
-    setMessages((old) => [
-      ...old,
-      {
-        id: Date.now(),
-        sender: "user",
-        text: question,
-        time: formatTime(),
-      },
-    ]);
+    setDraft("");
+    setMobileMenuOpen(false);
   }
 
   function newChat() {
-    setMessages([
-      {
-        id: Date.now(),
-        sender: "assistant",
-        text: `سلام ${user.name} عزیز! 👋
-
-گفت‌وگوی جدیدت آماده است. چه موضوعی رو بررسی کنیم؟`,
-        time: formatTime(),
-      },
-    ]);
-    setMobileSidebar(false);
+    if (!profile) return;
+    setMessages([welcomeMessage(profile)]);
+    setDraft("");
+    setMobileMenuOpen(false);
+    stickToBottom.current = true;
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) {
+  function handleKeyDown(
+    event: KeyboardEvent<HTMLTextAreaElement>
+  ) {
+    const mobile = window.matchMedia(
+      "(max-width: 767px)"
+    ).matches;
+
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing &&
+      !mobile
+    ) {
       event.preventDefault();
       sendMessage();
     }
   }
 
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+
+    const styles = window.getComputedStyle(textarea);
+    const lineHeight = parseFloat(styles.lineHeight) || 28;
+    const padding =
+      (parseFloat(styles.paddingTop) || 0) +
+      (parseFloat(styles.paddingBottom) || 0);
+    const borders =
+      (parseFloat(styles.borderTopWidth) || 0) +
+      (parseFloat(styles.borderBottomWidth) || 0);
+
+    const maxHeight = Math.ceil(
+      lineHeight * 5 + padding + borders
+    );
+
+    const requiredHeight = textarea.scrollHeight;
+
+    textarea.style.height = `${Math.min(
+      requiredHeight,
+      maxHeight
+    )}px`;
+
+    textarea.style.overflowY =
+      requiredHeight > maxHeight + 1 ? "auto" : "hidden";
+
+    if (stickToBottom.current && messagesRef.current) {
+      messagesRef.current.scrollTop =
+        messagesRef.current.scrollHeight;
+    }
+  }, [draft, profile, editing]);
+
+  useLayoutEffect(() => {
+    const container = messagesRef.current;
+
+    if (container && stickToBottom.current) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    const viewport = window.visualViewport;
+
+    function updateHeight() {
+      if (!shell) return;
+
+      const mobile = window.matchMedia(
+        "(max-width: 767px)"
+      ).matches;
+
+      shell.style.height =
+        mobile && viewport
+          ? `${Math.round(viewport.height)}px`
+          : "100dvh";
+
+      if (stickToBottom.current && messagesRef.current) {
+        messagesRef.current.scrollTop =
+          messagesRef.current.scrollHeight;
+      }
+    }
+
+    updateHeight();
+
+    window.addEventListener("resize", updateHeight);
+    viewport?.addEventListener("resize", updateHeight);
+
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+      viewport?.removeEventListener("resize", updateHeight);
+    };
+  }, [profile, editing]);
+
+  const showForm = !profile || editing;
+
   return (
-    <main className="consultation-root min-h-screen overflow-hidden text-white" dir="rtl">
-      <style jsx global>{`
-        * {
-          box-sizing: border-box;
-        }
+    <main
+      id="main-content"
+      dir="rtl"
+      className="min-h-[100dvh] bg-[#0b0a1d] text-white"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse at 90% 0%,rgba(104,60,220,.22),transparent 45%),radial-gradient(ellipse at 0% 100%,rgba(21,122,202,.13),transparent 48%)",
+      }}
+    >
+      {showForm ? (
+        <div className="mx-auto grid min-h-[100dvh] max-w-6xl items-center gap-10 px-4 py-8 lg:grid-cols-[.8fr_1.2fr] lg:px-8">
+          <div className="space-y-6 lg:sticky lg:top-10">
+            <Link
+              href="/"
+              className="inline-flex rounded-xl border border-white/10 px-4 py-2 text-xs text-white/65 transition hover:bg-white/10"
+            >
+              بازگشت به DAAL OPS
+            </Link>
 
-        .consultation-root {
-          --chat-bg: #0b0a1d;
-          --chat-panel: #11102a;
-          --chat-card: #171532;
-          --chat-border: rgba(255,255,255,.09);
-          background:
-            radial-gradient(ellipse at 85% 5%, rgba(91,48,190,.17), transparent 32%),
-            radial-gradient(ellipse at 5% 90%, rgba(18,91,190,.12), transparent 35%),
-            var(--chat-bg);
-          font-family: inherit;
-        }
+            <Avatar large />
 
-        .consultation-root button,
-        .consultation-root input,
-        .consultation-root textarea,
-        .consultation-root select {
-          font: inherit;
-        }
+            <div>
+              <p className="text-xs font-bold tracking-[.18em] text-cyan-300">
+                MEET GHOLAM
+              </p>
 
-        .assistant-avatar {
-          color: white;
-          background: linear-gradient(140deg,#9855ff,#5630d9 55%,#2456ed);
-          border: 1px solid rgba(255,255,255,.18);
-          box-shadow: 0 10px 35px rgba(100,57,230,.3);
-        }
+              <h1 className="mt-3 text-3xl font-black leading-[1.7] sm:text-4xl">
+                {editing
+                  ? "اطلاعاتت رو به‌روز کن"
+                  : "سلام! من غلامم 👋"}
+              </h1>
 
-        .consult-glass {
-          background: linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.018));
-          border: 1px solid var(--chat-border);
-          backdrop-filter: blur(22px);
-        }
+              <p className="mt-3 max-w-md text-sm leading-9 text-white/60">
+                {editing
+                  ? "اطلاعات جدیدت رو ثبت کن تا راهنمایی‌های بعدی دقیق‌تر باشن."
+                  : "قبل از اینکه گپ بزنیم، یکم باهات آشنا بشم. اسمت، شغلت و کسب‌وکارت رو بدونم، می‌تونم شخصی‌تر راهنماییت کنم."}
+              </p>
+            </div>
 
-        .consult-input {
-          width: 100%;
-          border: 1px solid rgba(255,255,255,.1);
-          border-radius: 15px;
-          background: rgba(9,8,30,.7);
-          color: white;
-          padding: 14px 16px;
-          font-size: 13px;
-          outline: none;
-          transition: .25s ease;
-        }
+            <div className="space-y-3 text-xs text-white/65">
+              <p>✦ بدون رمز عبور و کد تأیید</p>
+              <p>✦ گفت‌وگوی متناسب با اطلاعات اولیه شما</p>
+              <p>✦ آشنایی با خدمات و پکیج‌های دال آپس</p>
+            </div>
 
-        .consult-input::placeholder {
-          color: rgba(255,255,255,.3);
-        }
+            <p className="max-w-sm text-xs leading-7 text-amber-100/65">
+              حالت تست: اطلاعات فرم فقط در حافظه همین صفحه
+              نگه داشته می‌شن و به سرور ارسال نمی‌شن.
+            </p>
+          </div>
 
-        .consult-input:focus {
-          border-color: rgba(155,112,255,.8);
-          box-shadow: 0 0 0 4px rgba(133,83,255,.1);
-          background: rgba(16,13,47,.95);
-        }
+          <form
+            onSubmit={submitProfile}
+            className="rounded-[28px] border border-white/10 bg-[#15122c]/90 p-5 shadow-[0_30px_90px_rgba(0,0,0,.25)] backdrop-blur-xl sm:p-8"
+          >
+            <div className="mb-7 flex items-center justify-between gap-3 border-b border-white/10 pb-5">
+              <div>
+                <p className="text-xs text-cyan-300">
+                  پروفایل شخصی
+                </p>
+                <h2 className="mt-2 text-xl font-bold">
+                  {editing
+                    ? "ویرایش پروفایل"
+                    : "اول خودتو معرفی کن"}
+                </h2>
+              </div>
 
-        .consult-input[aria-invalid="true"] {
-          border-color: rgba(251,113,133,.8);
-        }
+              <span className="rounded-full border border-violet-400/25 bg-violet-400/10 px-3 py-2 text-[11px] text-violet-200">
+                اطلاعات اولیه
+              </span>
+            </div>
 
-        .consult-primary {
-          background: linear-gradient(100deg,#7218ec,#4934ed,#1765ff);
-          background-size: 200% 100%;
-          transition: background-position .4s, transform .3s, box-shadow .3s;
-          box-shadow: 0 12px 35px rgba(77,51,230,.25);
-        }
+            <div className="grid gap-5 sm:grid-cols-2">
+              <InputField
+                label="نام و نام خانوادگی"
+                required
+                value={form.fullName}
+                onChange={(v) => change("fullName", v)}
+                placeholder="مثلاً علی محمدی"
+              />
 
-        .consult-primary:hover {
-          background-position: 100% 0;
-          transform: translateY(-2px);
-          box-shadow: 0 16px 40px rgba(77,51,230,.4);
-        }
+              <InputField
+                label="شماره تماس"
+                required
+                type="tel"
+                value={form.phone}
+                onChange={(v) => change("phone", v)}
+                placeholder="مثلاً 09123456789"
+              />
 
-        .consult-card {
-          background: linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
-          border: 1px solid rgba(255,255,255,.08);
-          transition: .3s ease;
-        }
+              <InputField
+                label="ایمیل"
+                type="email"
+                value={form.email}
+                onChange={(v) => change("email", v)}
+                placeholder="name@example.com"
+              />
 
-        .consult-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(151,112,255,.4);
-          background: rgba(112,75,220,.09);
-        }
+              <InputField
+                label="نام شرکت یا سازمان"
+                value={form.companyName}
+                onChange={(v) => change("companyName", v)}
+                placeholder="مثلاً شرکت فناوری آریا"
+              />
 
-        .consult-appear {
-          animation: consultAppear .55s cubic-bezier(.2,.8,.2,1) both;
-        }
+              <SelectField
+                label="نوع مجموعه"
+                value={form.organizationType}
+                onChange={(v) => change("organizationType", v)}
+                options={[
+                  { value: "company", label: "شرکت خصوصی" },
+                  { value: "government", label: "سازمان دولتی" },
+                  { value: "startup", label: "استارتاپ" },
+                  { value: "self-employed", label: "شخصی / فریلنسر" },
+                  { value: "nonprofit", label: "مؤسسه / غیرانتفاعی" },
+                  { value: "other", label: "سایر" },
+                ]}
+              />
 
-        .consult-float {
-          animation: consultFloat 5s ease-in-out infinite;
-        }
+              <InputField
+                label="سمت یا شغل شما"
+                value={form.jobTitle}
+                onChange={(v) => change("jobTitle", v)}
+                placeholder="مثلاً مدیر IT، مدیرعامل، کارشناس"
+              />
 
-        .consult-glow {
-          animation: consultGlow 5s ease-in-out infinite;
-        }
+              <InputField
+                label="حوزه فعالیت مجموعه"
+                value={form.industry}
+                onChange={(v) => change("industry", v)}
+                placeholder="مثلاً فروشگاه، پزشکی، فناوری"
+              />
 
-        @keyframes consultAppear {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
+              <SelectField
+                label="تعداد کارکنان"
+                value={form.teamSize}
+                onChange={(v) => change("teamSize", v)}
+                options={[
+                  { value: "1", label: "فقط خودم" },
+                  { value: "2-10", label: "۲ تا ۱۰ نفر" },
+                  { value: "11-50", label: "۱۱ تا ۵۰ نفر" },
+                  { value: "51-200", label: "۵۱ تا ۲۰۰ نفر" },
+                  { value: "201+", label: "بیش از ۲۰۰ نفر" },
+                ]}
+              />
+            </div>
 
-        @keyframes consultFloat {
-          0%,100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
+            <div className="mt-5">
+              <SelectField
+                label="بیشتر برای چه موضوعی اومدی؟"
+                value={form.interest}
+                onChange={(v) => change("interest", v)}
+                options={[
+                  { value: "voip", label: "VoIP و تلفن سازمانی" },
+                  { value: "network", label: "شبکه و سرور" },
+                  { value: "devops", label: "DevOps و زیرساخت ابری" },
+                  { value: "automation", label: "اتوماسیون" },
+                  { value: "packages", label: "شناخت پکیج‌ها" },
+                  { value: "unsure", label: "هنوز مطمئن نیستم" },
+                ]}
+              />
+            </div>
 
-        @keyframes consultGlow {
-          0%,100% { opacity: .35; transform: scale(.95); }
-          50% { opacity: .8; transform: scale(1.08); }
-        }
+            {!profile && (
+              <label className="mt-6 flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-white/[0.035] p-4 text-xs leading-7 text-white/60">
+                <input
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  required
+                  className="mt-1 accent-cyan-400"
+                />
+                موافقم اطلاعات فرم به‌صورت موقت در همین
+                صفحه برای شخصی‌سازی گفت‌وگوی آزمایشی
+                استفاده بشه.
+              </label>
+            )}
 
-        .chat-scroll::-webkit-scrollbar {
-          width: 5px;
-        }
-
-        .chat-scroll::-webkit-scrollbar-thumb {
-          background: rgba(155,125,255,.3);
-          border-radius: 10px;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .consult-appear,
-          .consult-float,
-          .consult-glow {
-            animation: none !important;
-          }
-
-          .consult-card,
-          .consult-primary {
-            transition: none !important;
-          }
-        }
-      `}</style>
-
-      {stage === "welcome" ? (
-        <section className="relative flex min-h-screen items-center justify-center px-4 py-10 sm:px-7">
-          <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-violet-600/20 blur-[120px]" />
-          <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-blue-600/15 blur-[120px]" />
-
-          <div className="relative z-10 w-full max-w-5xl">
-            <header className="mb-10 flex items-center justify-between">
-              <Link href="/" className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 shadow-lg shadow-violet-600/20">
-                  <Icon name="spark" size={24} />
-                </div>
-                <div>
-                  <div className="text-lg font-black tracking-wide">DAAL OPS</div>
-                  <div className="text-[9px] tracking-[3px] text-white/35">SMART COMMUNICATION</div>
-                </div>
-              </Link>
-
-              <Link
-                href="/"
-                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-xs text-white/65 transition hover:bg-white/10"
+            {error && (
+              <p
+                role="alert"
+                className="mt-4 rounded-xl bg-rose-500/10 p-3 text-xs text-rose-300"
               >
-                <Icon name="home" size={16} />
-                بازگشت به سایت
-              </Link>
-            </header>
+                {error}
+              </p>
+            )}
 
-            <div className="consult-glass consult-appear relative overflow-hidden rounded-[30px]">
-              <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-violet-600/20 blur-[90px]" />
-              <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-blue-600/15 blur-[100px]" />
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                type="submit"
+                className="min-h-12 flex-1 rounded-xl bg-gradient-to-l from-violet-600 to-blue-600 px-6 py-3 text-sm font-bold shadow-lg shadow-violet-900/30 transition hover:brightness-110"
+              >
+                {editing
+                  ? "ذخیره تغییرات و بازگشت به چت"
+                  : "ثبت اطلاعات و شروع گفت‌وگو ←"}
+              </button>
 
-              <div className="relative grid lg:grid-cols-[.95fr_1.05fr]">
-                {/* Intro */}
-                <div className="relative flex flex-col justify-center overflow-hidden border-b border-white/10 p-7 sm:p-10 lg:border-b-0 lg:border-l">
-                  <div className="consult-glow pointer-events-none absolute right-1/2 top-1/2 h-64 w-64 -translate-y-1/2 translate-x-1/2 rounded-full bg-violet-500/15 blur-[80px]" />
+              {editing && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditing(false);
+                    setError("");
+                  }}
+                  className="rounded-xl border border-white/10 px-5 py-3 text-sm text-white/70"
+                >
+                  انصراف
+                </button>
+              )}
+            </div>
 
-                  <div className="relative">
-                    <div className="consult-float mb-8 flex h-24 w-24 items-center justify-center rounded-[30px] border border-violet-300/20 bg-gradient-to-br from-violet-500/30 to-blue-600/20 shadow-2xl shadow-violet-700/20">
-                      <AssistantAvatar large />
-                    </div>
+            <p className="mt-4 text-center text-[11px] leading-6 text-white/35">
+              فقط نام و شماره تماس ضروریه؛ بقیه اطلاعات
+              اختیاریه.
+            </p>
+          </form>
+        </div>
+      ) : (
+        <div
+          ref={shellRef}
+          className="flex h-[100dvh] min-h-0 overflow-hidden"
+        >
+          {/* Desktop sidebar */}
+          <aside className="hidden w-[285px] shrink-0 flex-col border-l border-white/10 bg-[#100e24]/95 p-5 lg:flex">
+            <div className="flex items-center gap-3 border-b border-white/10 pb-5">
+              <Avatar />
 
-                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/[0.07] px-3 py-2 text-[10px] text-emerald-300">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      فضای اختصاصی مشاوره
-                    </div>
-
-                    <h1 className="text-3xl font-black leading-[1.7] sm:text-4xl">
-                      ارتباط هوشمند،
-                      <span className="block bg-gradient-to-l from-cyan-300 via-violet-300 to-purple-400 bg-clip-text text-transparent">
-                        تصمیم بهتر
-                      </span>
-                    </h1>
-
-                    <p className="mt-5 max-w-md text-sm leading-8 text-white/55">
-                      سؤالاتت رو مطرح کن، با خدمات ما آشنا شو و راهکار مناسب
-                      برای ارتباطات کسب‌وکارت رو پیدا کن.
-                    </p>
-
-                    <div className="mt-9 space-y-4">
-                      {[
-                        "آشنایی با راهکارهای تلفن ابری",
-                        "مشاوره راه‌اندازی مرکز تماس",
-                        "بررسی نیازهای ارتباطی سازمان",
-                      ].map((item) => (
-                        <div key={item} className="flex items-center gap-3 text-xs text-white/65">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-violet-400/10 text-violet-300">
-                            ✓
-                          </span>
-                          {item}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-10 flex items-center gap-3 border-t border-white/10 pt-6">
-                      <div className="flex -space-x-2 space-x-reverse">
-                        <span className="h-8 w-8 rounded-full border-2 border-[#17132f] bg-gradient-to-br from-violet-400 to-indigo-600" />
-                        <span className="h-8 w-8 rounded-full border-2 border-[#17132f] bg-gradient-to-br from-cyan-400 to-blue-600" />
-                        <span className="h-8 w-8 rounded-full border-2 border-[#17132f] bg-gradient-to-br from-pink-400 to-purple-600" />
-                      </div>
-                      <span className="text-[10px] text-white/40">
-                        شروع یک گفت‌وگوی هدفمند با DAAL OPS
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Registration */}
-                <div className="relative p-6 sm:p-10">
-                  <div className="mb-8">
-                    <div className="mb-3 text-xs font-bold text-violet-300">
-                      WELCOME TO DAAL OPS
-                    </div>
-                    <h2 className="text-2xl font-black">قبل از شروع، با هم آشنا بشیم</h2>
-                    <p className="mt-3 text-xs leading-7 text-white/45">
-                      چند مشخصات ساده وارد کن تا وارد فضای گفت‌وگو بشی.
-                    </p>
-                  </div>
-
-                  <form onSubmit={startChat} noValidate className="space-y-5">
-                    <div>
-                      <label htmlFor="name" className="mb-2 block text-xs font-medium text-white/80">
-                        نام و نام خانوادگی *
-                      </label>
-                      <input
-                        id="name"
-                        className="consult-input"
-                        placeholder="نام کامل شما"
-                        value={user.name}
-                        onChange={(e) => updateUser("name", e.target.value)}
-                        autoComplete="name"
-                        aria-invalid={Boolean(errors.name)}
-                      />
-                      {errors.name && <p className="mt-2 text-xs text-rose-300">{errors.name}</p>}
-                    </div>
-
-                    <div>
-                      <label htmlFor="contact" className="mb-2 block text-xs font-medium text-white/80">
-                        شماره تماس یا ایمیل *
-                      </label>
-                      <input
-                        id="contact"
-                        className="consult-input"
-                        placeholder="09xxxxxxxxx یا example@email.com"
-                        value={user.contact}
-                        onChange={(e) => updateUser("contact", e.target.value)}
-                        autoComplete="email"
-                        aria-invalid={Boolean(errors.contact)}
-                      />
-                      {errors.contact && <p className="mt-2 text-xs text-rose-300">{errors.contact}</p>}
-                    </div>
-
-                    <div>
-                      <label htmlFor="company" className="mb-2 block text-xs font-medium text-white/80">
-                        نام شرکت یا مجموعه
-                        <span className="mr-1 text-white/35">(اختیاری)</span>
-                      </label>
-                      <input
-                        id="company"
-                        className="consult-input"
-                        placeholder="نام کسب‌وکار شما"
-                        value={user.company}
-                        onChange={(e) => updateUser("company", e.target.value)}
-                        autoComplete="organization"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="business" className="mb-2 block text-xs font-medium text-white/80">
-                        زمینه فعالیت
-                      </label>
-                      <select
-                        id="business"
-                        className="consult-input [color-scheme:dark]"
-                        value={user.business}
-                        onChange={(e) => updateUser("business", e.target.value)}
-                      >
-                        <option value="">انتخاب کنید</option>
-                        <option>شرکت و سازمان</option>
-                        <option>فروشگاه و کسب‌وکار آنلاین</option>
-                        <option>استارتاپ</option>
-                        <option>مرکز تماس</option>
-                        <option>فعالیت شخصی</option>
-                        <option>سایر</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="topic" className="mb-2 block text-xs font-medium text-white/80">
-                        موضوع موردنظر
-                      </label>
-                      <select
-                        id="topic"
-                        className="consult-input [color-scheme:dark]"
-                        value={user.topic}
-                        onChange={(e) => updateUser("topic", e.target.value)}
-                      >
-                        {topics.map((item) => (
-                          <option key={item}>{item}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex items-start gap-3 rounded-xl border border-cyan-300/10 bg-cyan-300/[0.045] p-3.5">
-                      <Icon name="shield" size={18} />
-                      <p className="text-[10px] leading-6 text-white/45">
-                        اطلاعات شما در این نسخه به سرور ارسال نمی‌شود.
-                        اتصال امن به سامانه مشاوره در مرحله بعد پیاده‌سازی خواهد شد.
-                      </p>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="consult-primary flex w-full items-center justify-center gap-3 rounded-2xl px-5 py-4 text-sm font-bold text-white"
-                    >
-                      <Icon name="spark" size={19} />
-                      ورود به فضای مشاوره
-                      <Icon name="arrow" size={18} />
-                    </button>
-                  </form>
-                </div>
+              <div>
+                <p className="font-bold">غلام • DAAL OPS</p>
+                <p className="mt-1 text-[11px] text-violet-300">
+                  راهنمای خدمات
+                </p>
               </div>
             </div>
 
-            <footer className="mt-7 text-center text-[10px] text-white/25">
-              © DAAL OPS · راهکارهای هوشمند ارتباطی
-            </footer>
-          </div>
-        </section>
-      ) : (
-        <section className="flex min-h-screen">
-          {/* Sidebar */}
-          <aside
-            className={`fixed inset-y-0 right-0 z-50 flex w-[280px] flex-col border-l border-white/10 bg-[#100e28] transition-transform duration-300 lg:static lg:translate-x-0 ${
-              mobileSidebar ? "translate-x-0" : "translate-x-full"
-            }`}
-          >
-            <div className="flex h-[78px] items-center justify-between border-b border-white/10 px-5">
-              <Link href="/" className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-600">
-                  <Icon name="spark" size={22} />
-                </div>
-                <div>
-                  <div className="font-black tracking-wide">DAAL OPS</div>
-                  <div className="text-[8px] tracking-[2px] text-white/35">CONSULTATION</div>
-                </div>
-              </Link>
+            <button
+              type="button"
+              onClick={newChat}
+              className="mt-6 flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-violet-400/25 bg-violet-400/10 px-4 text-sm font-semibold text-violet-100 transition hover:bg-violet-400/20"
+            >
+              <span className="text-xl">＋</span>
+              گفت‌وگوی جدید
+            </button>
 
+            <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+              <p className="text-[11px] text-white/40">
+                پروفایل شما
+              </p>
+              <p className="mt-2 font-bold">
+                {profile.fullName}
+              </p>
+              {profile.companyName && (
+                <p className="mt-1 text-xs text-white/50">
+                  {profile.companyName}
+                </p>
+              )}
               <button
-                onClick={() => setMobileSidebar(false)}
-                className="rounded-lg p-2 text-white/50 hover:bg-white/10 lg:hidden"
-                aria-label="بستن منو"
+                type="button"
+                onClick={() => {
+                  setForm(profile);
+                  setEditing(true);
+                }}
+                className="mt-4 text-xs text-violet-300 hover:text-violet-200"
               >
-                ✕
+                ویرایش اطلاعات
               </button>
             </div>
 
-            <div className="p-4">
-              <button
-                onClick={newChat}
-                className="consult-primary flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold"
-              >
-                <Icon name="plus" size={17} />
-                گفت‌وگوی جدید
-              </button>
-            </div>
+            <p className="mb-3 mt-7 text-xs font-semibold text-white/50">
+              شروع سریع
+            </p>
 
-            <div className="px-5 pb-2 pt-5 text-[10px] font-bold text-white/35">
-              تاریخچه گفت‌وگوها
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-3">
-              {chatHistory.map((item, index) => (
+            <div className="space-y-2">
+              {topics.map((topic) => (
                 <button
-                  key={`${item}-${index}`}
-                  className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-right text-xs transition ${
-                    index === 0
-                      ? "border border-violet-400/15 bg-violet-500/10 text-white"
-                      : "text-white/45 hover:bg-white/[0.05]"
-                  }`}
+                  key={topic.title}
+                  type="button"
+                  onClick={() => sendMessage(topic.question)}
+                  className="flex w-full items-center gap-3 rounded-xl border border-transparent px-3 py-3 text-right text-xs text-white/65 transition hover:border-white/10 hover:bg-white/[0.05]"
                 >
-                  <Icon name="message" size={16} />
-                  <span className="truncate">{item}</span>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-400/10 text-lg text-violet-300">
+                    {topic.icon}
+                  </span>
+                  {topic.title}
                 </button>
               ))}
             </div>
 
-            <div className="border-t border-white/10 p-4">
-              <div className="flex items-center gap-3 rounded-xl bg-white/[0.04] p-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-600 font-bold">
-                  {user.name.charAt(0)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-xs font-bold">{user.name}</div>
-                  <div className="mt-1 truncate text-[9px] text-white/35">
-                    {user.company || user.contact}
-                  </div>
-                </div>
-                <Icon name="user" size={17} />
-              </div>
-            </div>
+            <Link
+              href="/"
+              className="mt-auto border-t border-white/10 pt-5 text-xs text-cyan-300"
+            >
+              بازگشت به سایت ←
+            </Link>
           </aside>
 
-          {mobileSidebar && (
-            <button
-              aria-label="بستن منو"
-              onClick={() => setMobileSidebar(false)}
-              className="fixed inset-0 z-40 bg-black/65 lg:hidden"
-            />
-          )}
-
-          {/* Main chat */}
+          {/* Chat main */}
           <div className="flex min-w-0 flex-1 flex-col">
-            <header className="flex h-[78px] shrink-0 items-center justify-between border-b border-white/10 bg-[#0d0b20]/80 px-4 backdrop-blur-xl sm:px-7">
-              <div className="flex items-center gap-3">
+            <header className="flex min-h-[72px] shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-[#100d26]/90 px-3 backdrop-blur-xl sm:min-h-[82px] sm:px-7">
+              <div className="flex min-w-0 items-center gap-3">
+                <Avatar />
+                <div className="min-w-0">
+                  <h1 className="text-sm font-bold sm:text-lg">
+                    گفت‌وگو با غلام
+                  </h1>
+                  <p className="mt-1 truncate text-[11px] text-white/50">
+                    راهنمای خدمات DAAL OPS
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
                 <button
-                  onClick={() => setMobileSidebar(true)}
-                  className="rounded-xl border border-white/10 p-2.5 text-white/60 lg:hidden"
-                  aria-label="باز کردن منو"
+                  type="button"
+                  onClick={() =>
+                    setMobileMenuOpen((previous) => !previous)
+                  }
+                  aria-expanded={mobileMenuOpen}
+                  aria-controls="gholam-mobile-menu"
+                  className="rounded-xl border border-white/10 px-3 py-2.5 text-[11px] text-white/75 lg:hidden"
                 >
-                  <span className="text-lg">☰</span>
+                  منو
                 </button>
 
-                <AssistantAvatar />
-
-                <div>
-                  <div className="text-sm font-bold">دستیار مشاوره DAAL OPS</div>
-                  <div className="mt-1 flex items-center gap-2 text-[10px] text-emerald-300">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    محیط گفت‌وگو آماده است
-                  </div>
-                </div>
+                <Link
+                  href="/"
+                  className="rounded-xl border border-white/10 px-3 py-2.5 text-[11px] text-white/70 transition hover:bg-white/10 sm:px-4"
+                >
+                  بازگشت
+                </Link>
               </div>
-
-              <Link
-                href="/"
-                className="flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2.5 text-[10px] text-white/55 transition hover:bg-white/5 sm:text-xs"
-              >
-                <Icon name="home" size={15} />
-                <span className="hidden sm:inline">بازگشت به سایت</span>
-              </Link>
             </header>
 
-            <div className="chat-scroll flex-1 overflow-y-auto px-4 py-8 sm:px-8">
-              <div className="mx-auto max-w-4xl">
-                <div className="mb-10 flex items-center justify-center">
-                  <span className="rounded-full border border-white/10 bg-white/[0.035] px-4 py-2 text-[10px] text-white/35">
-                    شروع گفت‌وگو · {user.name}
-                  </span>
+            {mobileMenuOpen && (
+              <div
+                id="gholam-mobile-menu"
+                className="max-h-[45dvh] shrink-0 space-y-2 overflow-y-auto border-b border-white/10 bg-[#15112c] p-3 lg:hidden"
+              >
+                <button
+                  type="button"
+                  onClick={newChat}
+                  className="w-full rounded-xl border border-violet-400/25 p-3 text-right text-sm text-violet-200"
+                >
+                  + گفت‌وگوی جدید
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForm(profile);
+                    setEditing(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full rounded-xl border border-white/10 p-3 text-right text-sm text-white/70"
+                >
+                  ویرایش پروفایل
+                </button>
+
+                {topics.map((topic) => (
+                  <button
+                    key={topic.title}
+                    type="button"
+                    onClick={() => sendMessage(topic.question)}
+                    className="w-full rounded-xl border border-white/10 p-3 text-right text-xs text-white/70"
+                  >
+                    {topic.icon} {topic.title}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Messages */}
+            <div
+              ref={messagesRef}
+              onScroll={(event) => {
+                const el = event.currentTarget;
+                stickToBottom.current =
+                  el.scrollHeight -
+                    el.scrollTop -
+                    el.clientHeight <
+                  90;
+              }}
+              className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-5 sm:px-8 sm:py-7"
+            >
+              <div className="mx-auto max-w-3xl">
+                <div className="mb-7 overflow-hidden rounded-[26px] border border-violet-400/15 bg-gradient-to-l from-violet-500/[0.12] via-[#191335] to-[#11172c] p-5 sm:p-7">
+                  <div className="flex items-center gap-4">
+                    <Avatar large />
+                    <div>
+                      <p className="text-[11px] font-bold text-violet-300">
+                        دستیار DAAL OPS
+                      </p>
+                      <h2 className="mt-1 text-xl font-black sm:text-2xl">
+                        سلام {firstName} جان! 👋
+                      </h2>
+                    </div>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-8 text-white/60">
+                    خوش اومدی! می‌تونیم با هم خدمات دال آپس رو
+                    بررسی کنیم و برای نیاز کسب‌وکارت یک
+                    نقطه شروع مناسب پیدا کنیم.
+                  </p>
+
+                  <div className="mt-5 grid grid-cols-2 gap-2 sm:gap-3">
+                    {topics.map((topic) => (
+                      <button
+                        key={topic.title}
+                        type="button"
+                        onClick={() => sendMessage(topic.question)}
+                        className="group rounded-2xl border border-white/10 bg-white/[0.045] p-3 text-right transition hover:border-violet-400/40 hover:bg-violet-400/10 sm:p-4"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-400/10 text-xl text-violet-200 transition group-hover:bg-violet-400/20">
+                          {topic.icon}
+                        </span>
+                        <span className="mt-3 block text-xs font-bold leading-6 sm:text-sm">
+                          {topic.title}
+                        </span>
+                        <span className="mt-1 block text-[10px] leading-5 text-white/40 sm:text-xs">
+                          {topic.subtitle}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {messages.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`consult-appear mb-7 flex items-end gap-3 ${
-                      item.sender === "user" ? "justify-start" : "justify-end"
-                    }`}
-                  >
-                    {item.sender === "assistant" && <AssistantAvatar />}
-
+                <div className="space-y-5">
+                  {messages.map((message) => (
                     <div
-                      className={`max-w-[85%] rounded-2xl px-5 py-4 sm:max-w-[75%] ${
-                        item.sender === "user"
-                          ? "rounded-br-sm border border-indigo-300/20 bg-gradient-to-br from-indigo-600 to-violet-700 shadow-lg shadow-indigo-950/30"
-                          : "rounded-bl-sm border border-white/10 bg-white/[0.055]"
+                      key={message.id}
+                      className={`flex items-end gap-2 ${
+                        message.role === "user"
+                          ? "justify-start"
+                          : "justify-end"
                       }`}
                     >
-                      <p className="whitespace-pre-line text-sm leading-8 text-white/90">
-                        {item.text}
-                      </p>
-                      <div className="mt-2 text-left text-[9px] text-white/35">
-                        {item.time}
+                      {message.role === "assistant" && (
+                        <Avatar />
+                      )}
+
+                      <div
+                        className={`max-w-[85%] rounded-[22px] border px-4 py-3.5 shadow-sm sm:max-w-[76%] sm:px-5 ${
+                          message.role === "user"
+                            ? "rounded-br-md border-indigo-300/20 bg-gradient-to-br from-[#5146b9] to-[#7539c8]"
+                            : "rounded-bl-md border-white/10 bg-[#1a1730]"
+                        }`}
+                      >
+                        <p className="whitespace-pre-wrap break-words text-[13px] leading-8 text-white/90 sm:text-sm">
+                          {message.content}
+                        </p>
+
+                        <p className="mt-2 text-left text-[10px] text-white/35">
+                          {formatTime(message.time)}
+                        </p>
                       </div>
                     </div>
-
-                    {item.sender === "user" && (
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-sm font-bold">
-                        {user.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {messages.length === 1 && (
-                  <div className="consult-appear mt-12">
-                    <div className="mb-5 text-center">
-                      <h2 className="text-xl font-black">چطور می‌تونیم کمکت کنیم؟</h2>
-                      <p className="mt-2 text-xs text-white/40">
-                        یکی از موضوعات زیر رو برای شروع انتخاب کن.
-                      </p>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {suggestions.map((item) => (
-                        <button
-                          key={item.title}
-                          onClick={() => sendSuggestion(item.question)}
-                          className="consult-card rounded-2xl p-5 text-right"
-                        >
-                          <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/25 to-blue-500/20 text-lg text-violet-200">
-                            {item.icon}
-                          </div>
-                          <div className="text-sm font-bold">{item.title}</div>
-                          <div className="mt-2 text-[11px] leading-6 text-white/40">
-                            {item.description}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="shrink-0 border-t border-white/10 bg-[#0d0b20]/80 px-4 py-5 backdrop-blur-xl sm:px-8">
-              <div className="mx-auto max-w-4xl">
-                <form
-                  onSubmit={sendMessage}
-                  className="flex items-end gap-3 rounded-2xl border border-white/10 bg-[#17142f] p-2.5 transition focus-within:border-violet-400/40 focus-within:shadow-lg focus-within:shadow-violet-500/10"
+            {/* Composer */}
+            <div className="shrink-0 border-t border-white/10 bg-[#100d26]/95 px-3 pb-[max(10px,env(safe-area-inset-bottom))] pt-3 sm:px-8 sm:py-4">
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  sendMessage();
+                }}
+                className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-[28px] border border-white/10 bg-[#1b1734] p-2 shadow-[0_12px_36px_rgba(0,0,0,.18)] transition-colors focus-within:border-violet-400/50 sm:gap-3 sm:p-2.5"
+              >
+                <textarea
+                  ref={textareaRef}
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={handleKeyDown}
+                  rows={1}
+                  maxLength={2000}
+                  aria-label="پیام به غلام"
+                  placeholder={`پیامت رو بنویس، ${firstName} جان...`}
+                  className="block min-h-12 min-w-0 flex-1 resize-none rounded-[20px] border-0 bg-transparent px-3 py-2.5 text-base leading-7 text-white outline-none ring-0 placeholder:text-white/35 focus:border-0 focus:outline-none focus:ring-0 sm:text-sm"
+                  style={{
+                    boxSizing: "border-box",
+                    overflowY: "hidden",
+                    maxHeight: "160px",
+                    boxShadow: "none",
+                    scrollbarWidth: "thin",
+                    scrollbarColor:
+                      "rgba(255,255,255,.2) transparent",
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  disabled={!draft.trim()}
+                  className="flex h-12 min-w-[66px] shrink-0 items-center justify-center rounded-[20px] bg-gradient-to-l from-violet-600 to-blue-600 px-4 text-sm font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 sm:min-w-[74px]"
                 >
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    rows={1}
-                    placeholder="پیامت رو اینجا بنویس..."
-                    className="max-h-32 min-h-12 flex-1 resize-none bg-transparent px-3 py-3 text-sm text-white outline-none placeholder:text-white/30"
-                  />
+                  ارسال
+                </button>
+              </form>
 
-                  <button
-                    type="submit"
-                    disabled={!message.trim()}
-                    aria-label="ارسال پیام"
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 text-white shadow-lg shadow-violet-900/30 transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    <Icon name="send" size={19} />
-                  </button>
-                </form>
-
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[9px] text-white/30">
-                  <span>Shift + Enter برای رفتن به خط بعد</span>
-                  <span>DAAL OPS · Smart Consultation</span>
-                </div>
-
-                <div className="mt-4 rounded-xl border border-amber-300/10 bg-amber-300/[0.035] px-4 py-2.5 text-center text-[10px] leading-6 text-amber-100/50">
-                  این نسخه رابط اولیه چت است؛ اتصال هوش مصنوعی و پاسخ‌گویی خودکار در مرحله بعد اضافه می‌شود.
-                </div>
-              </div>
+              <p className="mt-2 text-center text-[10px] leading-5 text-white/35">
+                نسخه آزمایشی • پاسخ‌های راهنما بدون اتصال به AI
+              </p>
             </div>
           </div>
-        </section>
+        </div>
       )}
     </main>
   );

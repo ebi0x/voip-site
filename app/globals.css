@@ -515,3 +515,795 @@ label {
     transition: none;
   }
 }
+/* ==========================================
+   DAAL OPS — MOBILE UX DESIGN
+   Responsive layout / Phase 1
+   ========================================== */
+
+@media (max-width: 767px) {
+
+  /* GENERAL */
+
+  html {
+    scroll-padding-top: 72px;
+  }
+
+  section[id] {
+    scroll-margin-top: 72px;
+  }
+
+  #services,
+  #showcase,
+  #packages,
+  #process,
+  #support,
+  #faq {
+    padding-top: 44px;
+    padding-bottom: 44px;
+  }
+
+  #services > div,
+  #showcase > div,
+  #packages > div,
+  #process > div,
+  #support > div,
+  #faq > div {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  #services h2,
+  #showcase h2,
+  #packages h2,
+  #process h2,
+  #support h2,
+  #faq h2 {
+    font-size: clamp(22px, 6vw, 28px);
+    line-height: 1.55;
+    letter-spacing: 0;
+  }
+
+  /* SERVICES
+     چهار کارت افقی ساده */
+
+  #services > div > ul {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 26px;
+  }
+
+  #services > div > ul > li > article {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+    gap: 4px 13px;
+
+    height: auto;
+    min-height: 104px;
+    padding: 17px 15px;
+
+    text-align: right;
+    border-radius: 18px;
+  }
+
+  #services > div > ul > li > article > span:first-child {
+    grid-row: 1 / span 2;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+
+  #services > div > ul > li > article > span:first-child svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  #services > div > ul > li > article > h3 {
+    margin-top: 0;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  #services > div > ul > li > article > p {
+    margin-top: 0;
+    font-size: 12px;
+    line-height: 1.8;
+    text-wrap: pretty;
+  }
+
+  /* SHOWCASE & VIDEO */
+
+  #showcase > div {
+    gap: 25px;
+  }
+
+  #showcase h2 {
+    margin-top: 10px;
+  }
+
+  #showcase p {
+    line-height: 1.9;
+  }
+
+  #showcase .flex.flex-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  #showcase .flex.flex-wrap > a {
+    display: flex;
+    min-height: 50px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  #showcase video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* PACKAGES
+     یک پکیج در هر ردیف */
+
+  #packages > div > ul {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 28px;
+  }
+
+  #packages > div > ul > li > article {
+    padding: 27px 19px 20px;
+    border-radius: 22px;
+  }
+
+  #packages > div > ul > li > article > h3 {
+    font-size: 23px;
+  }
+
+  #packages > div > ul > li > article > ul {
+    gap: 9px;
+    margin-top: 20px;
+  }
+
+  #packages > div > ul > li > article > ul > li {
+    min-height: 44px;
+    padding: 10px 13px;
+    text-align: right;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  #packages button[aria-haspopup="dialog"] {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 22px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* PROCESS
+     مراحل ساده بدون تصویر تزئینی */
+
+  #process > div > div:last-child {
+    gap: 0;
+    margin-top: 27px;
+  }
+
+  #process > div > div:last-child > div:last-child {
+    display: none;
+  }
+
+  #process ol {
+    gap: 11px;
+  }
+
+  #process ol > li > button {
+    gap: 12px;
+    min-height: 74px;
+    padding: 13px;
+    border-radius: 17px;
+  }
+
+  #process ol > li > button > span[aria-hidden="true"] {
+    display: none;
+  }
+
+  #process ol > li > button > span:nth-of-type(4) {
+    display: none;
+  }
+
+  #process ol > li > button > span:first-child {
+    width: 42px;
+    height: 42px;
+  }
+
+  #process ol > li > button .text-sm {
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  /* SUPPORT
+     تمرکز روی دکمه‌ها */
+
+  #support > div > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 23px 17px;
+    border-radius: 23px;
+  }
+
+  #support > div > div > div:last-child {
+    display: none;
+  }
+
+  #support h2 {
+    margin-top: 16px;
+  }
+
+  #support p {
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  #support button[aria-haspopup="dialog"] {
+    display: flex;
+    width: 100%;
+    min-height: 54px;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 15px;
+    font-size: 13px;
+  }
+
+  /* FAQ
+     فقط سؤال و جواب */
+
+  #faq > div > div:last-child {
+    gap: 0;
+    margin-top: 26px;
+  }
+
+  #faq > div > div:last-child > div:last-child {
+    display: none;
+  }
+
+  #faq ul {
+    gap: 10px;
+  }
+
+  #faq ul button {
+    min-height: 58px;
+    padding: 14px 15px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  #faq ul p {
+    font-size: 12px;
+    line-height: 1.9;
+  }
+
+  /* FOOTER */
+
+  footer > div {
+    padding: 35px 18px 28px;
+  }
+
+  footer > div > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  footer > div > div > div:last-child {
+    order: -1;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  footer h3 {
+    font-size: 14px;
+  }
+
+  footer ul {
+    margin-top: 13px;
+  }
+
+  footer a,
+  footer button {
+    min-height: 40px;
+  }
+
+  footer img {
+    max-height: 50px;
+    width: auto;
+  }
+
+  /* HIDE DESKTOP SCROLL RAIL */
+
+  .scroll-rail {
+    display: none !important;
+  }
+
+  /* CHAT / TICKET / CONTACT MODALS */
+
+  .panel-dialog[open] > div {
+    padding: 8px;
+  }
+
+  .panel-dialog .panel-card {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 16px);
+    border-radius: 20px;
+  }
+
+  .panel-dialog input,
+  .panel-dialog textarea,
+  .panel-dialog select {
+    font-size: 16px;
+  }
+
+  /* TOUCH EXPERIENCE */
+
+  #services a,
+  #packages a,
+  #showcase a,
+  #faq button,
+  #process button {
+    touch-action: manipulation;
+  }
+
+}
+
+/* EXTRA SMALL PHONES */
+
+@media (max-width: 359px) {
+
+  #services > div,
+  #showcase > div,
+  #packages > div,
+  #process > div,
+  #support > div,
+  #faq > div {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  #services > div > ul > li > article {
+    padding: 13px 11px;
+    gap: 4px 10px;
+  }
+
+  #packages > div > ul > li > article {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+}
+/* DAAL OPS — Final mobile refinements */
+
+@media (max-width: 1023px) {
+  .scroll-rail {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 80px;
+  }
+
+  body {
+    min-width: 320px;
+  }
+
+  .panel-dialog[open] > div {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .panel-dialog .panel-card {
+    width: 100%;
+    max-width: 100%;
+    max-height: 94dvh;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .panel-dialog input,
+  .panel-dialog textarea,
+  .panel-dialog select {
+    font-size: 16px;
+  }
+
+  .js-reveal {
+    filter: none;
+    transform: translateY(12px);
+    transition-duration: 350ms;
+  }
+
+  .js-reveal.is-visible {
+    transform: none;
+  }
+
+  a,
+  button,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+/* DAAL OPS - Mobile dialogs */
+
+@media (max-width: 767px) {
+
+  .panel-dialog[open] > div {
+    align-items: flex-end !important;
+    justify-content: center;
+    padding: 0 !important;
+  }
+
+  .panel-dialog[open] .panel-card {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 4px);
+    border-radius: 24px 24px 0 0;
+  }
+
+  .panel-dialog[open] .panel-card input,
+  .panel-dialog[open] .panel-card select,
+  .panel-dialog[open] .panel-card textarea {
+    width: 100%;
+    max-width: 100%;
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .panel-dialog[open] .panel-card textarea {
+    min-height: 104px;
+  }
+
+  .panel-dialog[open] .panel-card button[type="submit"] {
+    min-height: 52px;
+  }
+
+  .panel-dialog[open] .panel-card .overflow-y-auto {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    min-width: 0;
+  }
+}
+/* ==========================================
+   DAAL OPS — CONSULT MOBILE RESPONSIVE
+   ========================================== */
+
+.consultation-root {
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+/* Chat viewport */
+
+.consultation-root > section:has(> aside) {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.consultation-root > section:has(> aside) > div:last-child {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.consultation-root .chat-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.consultation-root .chat-scroll p {
+  overflow-wrap: anywhere;
+}
+
+/* Hide non-functional demo history */
+
+.consultation-root aside > div:nth-child(3),
+.consultation-root aside > div:nth-child(4) {
+  display: none;
+}
+
+.consultation-root aside > div:last-child {
+  margin-top: auto;
+}
+
+/* Tablet */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .consultation-root .chat-scroll {
+    padding-inline: 28px;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 767px) {
+
+  /* Welcome screen */
+
+  .consultation-root > section:not(:has(> aside)) {
+    min-height: 100dvh;
+    align-items: flex-start;
+    padding: 18px 12px 30px;
+  }
+
+  .consultation-root > section:not(:has(> aside))
+  > div:last-child {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .consultation-root > section:not(:has(> aside))
+  header {
+    margin-bottom: 18px;
+  }
+
+  .consultation-root .consult-glass {
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .consultation-root .consult-glass
+  > .relative.grid > div:first-child {
+    padding: 22px 20px;
+  }
+
+  .consultation-root .consult-glass
+  > .relative.grid > div:last-child {
+    padding: 22px 18px;
+  }
+
+  .consultation-root .consult-glass h1 {
+    font-size: 25px;
+    line-height: 1.5;
+  }
+
+  .consultation-root .consult-glass h2 {
+    font-size: 20px;
+    line-height: 1.6;
+  }
+
+  .consultation-root .consult-glass
+  .consult-float {
+    width: 68px;
+    height: 68px;
+    margin-bottom: 16px;
+  }
+
+  .consultation-root .consult-glass
+  .consult-float .assistant-avatar {
+    transform: scale(.78);
+  }
+
+  /* Remove extra decoration on mobile */
+
+  .consultation-root .consult-glass
+  > .relative.grid > div:first-child .mt-9,
+  .consultation-root .consult-glass
+  > .relative.grid > div:first-child .mt-10 {
+    display: none;
+  }
+
+  .consultation-root .consult-glass
+  > .relative.grid > div:first-child p {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  .consultation-root form.space-y-5 > :not(:first-child) {
+    margin-top: 14px;
+  }
+
+  .consultation-root .consult-input {
+    min-height: 48px;
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+
+  .consultation-root .consult-primary {
+    min-height: 50px;
+  }
+
+  /* Mobile chat */
+
+  .consultation-root > section:has(> aside)
+  > div:last-child > header {
+    height: 66px;
+    min-height: 66px;
+    padding-inline: 12px;
+  }
+
+  .consultation-root > section:has(> aside)
+  > div:last-child > header > div:first-child {
+    min-width: 0;
+    gap: 9px;
+  }
+
+  .consultation-root > section:has(> aside)
+  > div:last-child > header .assistant-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .consultation-root > section:has(> aside)
+  > div:last-child > header .text-sm.font-bold {
+    font-size: 12px;
+  }
+
+  .consultation-root .chat-scroll {
+    padding: 16px 12px;
+  }
+
+  .consultation-root .chat-scroll
+  .consult-appear.mb-7 {
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .consultation-root .chat-scroll
+  .consult-appear.mb-7 > .assistant-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 12px;
+  }
+
+  .consultation-root .chat-scroll
+  .consult-appear.mb-7 > div[class*="max-w-"] {
+    max-width: 86%;
+    padding: 12px 14px;
+    border-radius: 16px;
+  }
+
+  .consultation-root .chat-scroll
+  .consult-appear.mb-7 p {
+    font-size: 13px;
+    line-height: 1.9;
+  }
+
+  /* Suggested questions */
+
+  .consultation-root .chat-scroll
+  .consult-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 12px;
+    padding: 13px;
+    text-align: right;
+  }
+
+  .consultation-root .chat-scroll
+  .consult-card > div:first-child {
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+
+  .consultation-root .chat-scroll
+  .consult-card > div:nth-child(2) {
+    font-size: 13px;
+  }
+
+  .consultation-root .chat-scroll
+  .consult-card > div:nth-child(3) {
+    margin-top: 2px;
+    font-size: 11px;
+  }
+
+  /* Message composer */
+
+  .consultation-root .chat-scroll + div {
+    padding: 10px 12px
+      max(12px, env(safe-area-inset-bottom));
+  }
+
+  .consultation-root .chat-scroll + div form {
+    align-items: flex-end;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 17px;
+  }
+
+  .consultation-root .chat-scroll + div textarea {
+    min-width: 0;
+    min-height: 44px;
+    max-height: 110px;
+    padding: 10px;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .consultation-root .chat-scroll + div
+  button[type="submit"] {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+  }
+
+  .consultation-root .chat-scroll + div
+  form + div {
+    margin-top: 8px;
+  }
+
+  .consultation-root .chat-scroll + div
+  form + div + div {
+    margin-top: 8px;
+    padding: 8px 10px;
+  }
+
+  /* Mobile sidebar */
+
+  .consultation-root aside {
+    width: min(280px, 85vw);
+    height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Avoid zoom on focus */
+
+  .consultation-root input,
+  .consultation-root textarea,
+  .consultation-root select {
+    font-size: 16px;
+  }
+}
+
+/* Small phones */
+
+@media (max-width: 359px) {
+  .consultation-root .chat-scroll {
+    padding-inline: 8px;
+  }
+
+  .consultation-root .chat-scroll
+  .consult-appear.mb-7 > div[class*="max-w-"] {
+    max-width: 88%;
+    padding: 10px 12px;
+  }
+}
+/* Restore original DAAL OPS sections */
+
+@media (max-width: 767px) {
+  #process > div > div:last-child > div:last-child,
+  #support > div > div > div:last-child,
+  #faq > div > div:last-child > div:last-child {
+    display: block !important;
+  }
+
+  #process .float-slow,
+  #faq .float-slow {
+    animation: none;
+  }
+
+  #process,
+  #support,
+  #faq {
+    scroll-margin-top: 80px;
+  }
+}

@@ -1,179 +1,211 @@
-import type { ReactNode } from "react";
 import { PanelTrigger } from "@/components/panels/panel-trigger";
-import { Reveal } from "@/components/reveal";
-import { CountUp } from "@/components/count-up";
 
-const svg = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.5,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-  "aria-hidden": true,
-};
-
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg {...svg} className={className}>
-      <circle cx="10.5" cy="10.5" r="6.5" />
-      <path d="M15.5 15.5L21 21" />
-    </svg>
-  );
-}
-
-function DiamondIcon({ className }: { className?: string }) {
-  return (
-    <svg {...svg} className={className}>
-      <path d="M6 4h12l4 5-10 11L2 9l4-5z" />
-      <path d="M2 9h20M9 4l-2 5 5 11M15 4l2 5-5 11" />
-    </svg>
-  );
-}
-
-function StarIcon({ className }: { className?: string }) {
-  return (
-    <svg {...svg} className={className}>
-      <path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z" />
-    </svg>
-  );
-}
-
-function CrownIcon({ className }: { className?: string }) {
-  return (
-    <svg {...svg} className={className}>
-      <path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z" />
-      <path d="M5 19h14" />
-    </svg>
-  );
-}
-
-function BulletIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 12 12" className={className} aria-hidden="true">
-      <path d="M6 1l1.4 3.6L11 6 7.4 7.4 6 11 4.6 7.4 1 6l3.6-1.4L6 1z" fill="currentColor" />
-    </svg>
-  );
-}
-
-type Plan = {
-  id: string;
-  name: string;
-  tagline: string;
-  price: string;
-  amount: number;
-  features: readonly string[];
-  icon: ReactNode;
-  popular?: boolean;
-};
-
-const plans: readonly Plan[] = [
+const plans = [
   {
     id: "basic",
     name: "پایه",
-    tagline: "شروع مطمئن",
+    description: "برای شروع کار",
     price: "۱۴۹,۰۰۰",
-    amount: 149000,
-    features: ["۲۰۰ دقیقه تماس", "بدون شماره اختصاصی", "داشبورد ساده", "پشتیبانی تیکتی"],
-    icon: <SearchIcon className="h-10 w-10" />,
+    features: [
+      "۲۰۰ دقیقه تماس",
+      "بدون شماره اختصاصی",
+      "داشبورد ساده",
+      "پشتیبانی تیکتی",
+    ],
   },
   {
     id: "standard",
     name: "استاندارد",
-    tagline: "برای کسب و کار های کوچک",
+    description: "برای کسب‌وکارهای کوچک",
     price: "۲۹۹,۰۰۰",
-    amount: 299000,
-    features: ["۶۰۰ دقیقه تماس", "شماره اختصاصی", "داشبورد انلاین", "پشتیبانی ۲۴/۷"],
-    icon: <DiamondIcon className="h-10 w-10" />,
-    popular: true,
+    features: [
+      "۶۰۰ دقیقه تماس",
+      "شماره اختصاصی",
+      "داشبورد آنلاین",
+      "پشتیبانی ۲۴/۷",
+    ],
+    recommended: true,
   },
   {
     id: "pro",
-    name: "حرفه ای",
-    tagline: "برای کسب و کار های متوسط",
+    name: "حرفه‌ای",
+    description: "برای کسب‌وکارهای متوسط",
     price: "۴۹۹,۰۰۰",
-    amount: 499000,
-    features: ["۱۰۰۰ دقیقه تماس", "مرکز تماس", "گزارش گیری پایه", "پشتیبانی ۲۴/۷"],
-    icon: <StarIcon className="h-10 w-10" />,
+    features: [
+      "۱۰۰۰ دقیقه تماس",
+      "مرکز تماس",
+      "گزارش‌گیری پایه",
+      "پشتیبانی ۲۴/۷",
+    ],
   },
   {
     id: "vip",
     name: "VIP",
-    tagline: "برای سازمان های بزرگ",
+    description: "برای سازمان‌های بزرگ",
     price: "۹۹۹,۰۰۰",
-    amount: 999000,
-    features: ["تماس نامحدود", "مرکز تماس پیشرفته", "گزارش های تحلیلی", "مشاوره اختصاصی"],
-    icon: <CrownIcon className="h-10 w-10" />,
+    features: [
+      "تماس نامحدود",
+      "مرکز تماس پیشرفته",
+      "گزارش‌های تحلیلی",
+      "مشاوره اختصاصی",
+    ],
   },
-];
+] as const;
+
+function CheckIcon() {
+  return (
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m5 12 4 4L19 6" />
+    </svg>
+  );
+}
 
 export function Packages() {
   return (
     <section
       id="packages"
-      className="relative isolate overflow-hidden py-16 text-[var(--text)] sm:py-20"
-      style={{
-        background:
-          "radial-gradient(520px circle at 0% 0%, var(--glow), transparent 70%), radial-gradient(520px circle at 100% 0%, var(--glow), transparent 70%), linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%)",
-      }}
+      dir="rtl"
+      className="relative overflow-hidden bg-[var(--bg-0)] py-12 text-[var(--text)] md:py-20"
     >
-      <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <Reveal className="text-center">
-          <div className="flex items-center justify-center gap-4">
-            <span aria-hidden="true" className="h-px w-14 bg-[var(--accent-2)]" />
-            <p className="text-lg font-bold text-[var(--accent-2)] sm:text-xl">پکیج های ما</p>
-            <span aria-hidden="true" className="h-px w-14 bg-[var(--accent-2)]" />
-          </div>
-          <h2 className="mt-4 text-3xl font-bold leading-[1.6] text-[var(--text)] sm:text-4xl">
-            انتخابی مناسب برای هر کسب و کار
-          </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-9 text-[var(--text-muted)] sm:text-lg">
-            با توجه به نیاز کسب و کار خود ، یکی از پکیج های زیر را انتخاب کنید
-            <br className="hidden sm:block" />
-            تمامی پکیج ها شامل کیفیت بالا پشتیبانی و امکان ارتقا در اینده را دارند
-          </p>
-        </Reveal>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="text-xs font-bold text-[var(--accent-2)]">
+            پکیج‌های DAAL OPS
+          </span>
 
-        <ul className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {plans.map((plan, index) => (
-            <Reveal as="li" key={plan.id} index={index} className="relative">
-              <article className="card-lift group glass-card relative flex h-full flex-col overflow-hidden rounded-2xl px-7 pb-7 pt-8 text-center">
-                {plan.popular && (
-                  <span className="absolute start-0 top-0 rounded-ee-2xl bg-[var(--accent-2)] py-1.5 pe-6 ps-4 text-xs font-bold text-[var(--bg-0)] [clip-path:polygon(0_0,100%_0,85%_100%,0_100%)]">
-                    محبوب ترین
-                  </span>
-                )}
-                <span className="mx-auto inline-flex text-[var(--accent-2)] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-110">
-                  {plan.icon}
-                </span>
-                <h3 className="mt-2 text-2xl font-bold text-[var(--text)]">{plan.name}</h3>
-                <p className="mt-1 text-sm text-[var(--text-muted)]">{plan.tagline}</p>
-                <p className="mt-6 text-xl font-bold text-[var(--text)]">
-                  <CountUp value={plan.amount} /> تومان / ماهیانه
-                </p>
-                <ul className="mt-6 flex flex-1 flex-col gap-3">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-center justify-between gap-3 rounded-lg bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--text-muted)]"
-                    >
-                      <span>{feature}</span>
-                      <BulletIcon className="h-3 w-3 shrink-0 text-[var(--accent-2)]" />
-                    </li>
-                  ))}
-                </ul>
-                <PanelTrigger
-                  panel="ticket"
-                  topic="purchase"
-                  message={`درخواست خرید پکیج «${plan.name}»`}
-                  className="btn-cta mt-7 inline-flex items-center justify-center rounded-xl px-6 py-3.5 text-base font-medium text-white transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-px"
+          <h2 className="mt-3 text-[25px] font-bold leading-[1.5] sm:text-4xl">
+            کدوم پکیج برای تو مناسبه؟
+          </h2>
+
+          <p className="mt-3 text-[13px] leading-7 text-[var(--text-muted)] sm:text-base">
+            امکانات و قیمت‌ها رو ببین و پکیج مناسب
+            کسب‌وکارت رو انتخاب کن.
+          </p>
+        </div>
+
+        <div className="mt-8 md:mt-12">
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+            {plans.map((plan) => (
+              <li key={plan.id} className="min-w-0">
+                <article
+                  className={`
+                    relative flex h-full flex-col
+                    rounded-[22px] border
+                    bg-[var(--surface)]
+                    p-5 transition-colors
+                    md:p-6
+                    ${
+                      "recommended" in plan &&
+                      plan.recommended
+                        ? "border-[var(--accent)]"
+                        : "border-[var(--border)]"
+                    }
+                  `}
                 >
-                  خرید پکیج
-                </PanelTrigger>
-              </article>
-            </Reveal>
-          ))}
-        </ul>
+                  {"recommended" in plan &&
+                    plan.recommended && (
+                      <span className="mb-4 w-fit rounded-full bg-[var(--accent)] px-3 py-1 text-[11px] font-bold text-white">
+                        پیشنهاد ما
+                      </span>
+                    )}
+
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-xl font-bold">
+                        {plan.name}
+                      </h3>
+
+                      <p className="mt-1 text-xs leading-6 text-[var(--text-muted)]">
+                        {plan.description}
+                      </p>
+                    </div>
+
+                    <span className="rounded-xl border border-[var(--border)] bg-[var(--surface-strong)] px-3 py-2 text-xs font-medium text-[var(--accent-2)]">
+                      {plan.id === "vip"
+                        ? "سازمانی"
+                        : "ماهانه"}
+                    </span>
+                  </div>
+
+                  <div className="mt-6 border-b border-[var(--border)] pb-5">
+                    <div className="flex flex-wrap items-baseline gap-2">
+                      <strong
+                        dir="ltr"
+                        className="text-[28px] font-bold tracking-tight"
+                      >
+                        {plan.price}
+                      </strong>
+
+                      <span className="text-xs text-[var(--text-muted)]">
+                        تومان / ماه
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="mt-5 text-xs font-bold">
+                    امکانات این پکیج
+                  </p>
+
+                  <ul className="mt-3 flex flex-1 flex-col gap-3">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex min-h-9 items-start gap-3 text-[13px] leading-7 text-[var(--text-muted)]"
+                      >
+                        <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--surface-strong)] text-[var(--accent-2)]">
+                          <CheckIcon />
+                        </span>
+
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <PanelTrigger
+                    panel="ticket"
+                    topic="purchase"
+                    message={`درخواست خرید پکیج «${plan.name}»`}
+                    className={`
+                      mt-6 flex min-h-[52px] w-full
+                      items-center justify-center
+                      rounded-2xl px-4
+                      text-sm font-bold
+                      transition-all active:scale-[0.98]
+                      ${
+                        "recommended" in plan &&
+                        plan.recommended
+                          ? "btn-cta text-white"
+                          : "border border-[var(--border)] bg-[var(--surface-strong)] text-[var(--text)] hover:border-[var(--accent)]"
+                      }
+                    `}
+                  >
+                    درخواست این پکیج
+                  </PanelTrigger>
+                </article>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="mt-6 text-center text-xs leading-7 text-[var(--text-muted)]">
+          برای انتخاب پکیج نیاز به راهنمایی داری؟{" "}
+          <a
+            href="/consult"
+            className="font-bold text-[var(--accent-2)] underline underline-offset-4"
+          >
+            از غلام بپرس
+          </a>
+        </p>
       </div>
     </section>
   );

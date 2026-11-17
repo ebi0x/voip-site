@@ -9,13 +9,16 @@ import { ScrollRail } from "@/components/scroll-rail";
 import { Services } from "@/components/services";
 import { Showcase } from "@/components/showcase";
 import { Support } from "@/components/support";
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
 export default function Home() {
   return (
     <PanelProvider>
       <ScrollRail />
+
       <Header />
-      <main id="main-content" className="flex-1">
+
+      <main id="main-content" className="min-w-0 flex-1">
         <Hero />
         <Services />
         <Showcase />
@@ -24,7 +27,16 @@ export default function Home() {
         <Support />
         <Faq />
       </main>
+
       <Footer />
+
+      {/* Space for the mobile navigation */}
+      <div
+        aria-hidden="true"
+        className="h-[calc(76px+env(safe-area-inset-bottom))] md:hidden"
+      />
+
+      <MobileBottomNav />
     </PanelProvider>
   );
 }

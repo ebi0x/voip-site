@@ -27,34 +27,79 @@ export function PanelFrame({
   children,
 }: PanelFrameProps) {
   return (
-    <div className="panel-card relative flex max-h-[min(90dvh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-white/15 bg-[#1b0d70]/95 text-white shadow-[0_40px_90px_-30px_rgba(10,4,60,0.95)]">
-      <header className="relative flex items-center gap-4 px-6 py-5">
+    <div
+      dir="rtl"
+      className="
+        panel-card relative
+        flex min-h-0 w-full min-w-0
+        max-w-none flex-col overflow-hidden
+        rounded-t-[24px] rounded-b-none
+        border border-white/15
+        bg-[#1b0d70] text-white
+        shadow-[0_25px_80px_rgba(5,2,35,0.55)]
+        md:max-h-[min(90dvh,720px)]
+        md:max-w-lg md:rounded-3xl
+      "
+    >
+      {/* Mobile drag indicator */}
+      <div
+        aria-hidden="true"
+        className="absolute left-1/2 top-2 z-10 h-1 w-10 -translate-x-1/2 rounded-full bg-white/30 md:hidden"
+      />
+
+      {/* Header */}
+      <header className="relative flex shrink-0 items-center gap-3 border-b border-white/10 px-4 pb-4 pt-7 md:gap-4 md:px-6 md:py-5">
         <div
           aria-hidden="true"
-          className={`absolute inset-0 bg-gradient-to-l ${accents[accent]} opacity-25`}
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-l ${accents[accent]} opacity-20`}
         />
+
         <span
-          className={`relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${accents[accent]} text-white shadow-[0_12px_28px_-10px_rgba(45,226,245,0.6)]`}
+          aria-hidden="true"
+          className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${accents[accent]} text-white md:h-12 md:w-12`}
         >
           {icon}
         </span>
+
         <div className="relative min-w-0 flex-1">
-          <h2 className="text-lg font-bold! leading-8 [font-family:var(--font-body)]">
+          <h2 className="text-base font-bold leading-7 text-white md:text-lg">
             {title}
           </h2>
-          <p className="text-xs leading-6 text-slate-200">{subtitle}</p>
+
+          <p className="mt-0.5 text-xs leading-5 text-slate-200">
+            {subtitle}
+          </p>
         </div>
+
         <button
           type="button"
           onClick={onClose}
-          aria-label="Ø¨Ø³ØªÙ†"
-          className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 text-white transition-colors duration-200 hover:bg-white/15"
+          aria-label="بستن پنجره"
+          className="
+            relative flex h-11 w-11 shrink-0
+            items-center justify-center
+            rounded-xl border border-white/15
+            bg-white/10 text-white
+            transition-colors hover:bg-white/20
+            focus-visible:outline-2
+            focus-visible:outline-offset-2
+            focus-visible:outline-white
+          "
         >
           <CloseIcon className="h-5 w-5" />
         </button>
       </header>
 
-      <div className="relative flex-1 overflow-y-auto px-6 pb-6 pt-2">
+      {/* Scrollable content */}
+      <div
+        className="
+          relative min-h-0 flex-1
+          overflow-y-auto overscroll-contain
+          px-4 pt-4
+          pb-[max(24px,env(safe-area-inset-bottom))]
+          md:px-6 md:pb-6
+        "
+      >
         {children}
       </div>
     </div>
