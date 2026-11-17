@@ -1,0 +1,903 @@
+﻿
+========== 01-getting-started\13-fonts.md ==========
+
+---
+title: Font Optimization
+description: Learn how to optimize fonts in Next.js
+related:
+  title: API Reference
+  description: See the API Reference for the full feature set of Next.js Font
+  links:
+    - app/api-reference/components/font
+---
+
+The [`next/font`](/docs/app/api-reference/components/font) module automatically optimizes your fonts and removes external network requests for improved privacy and performance.
+
+It includes **built-in self-hosting** for any font file. This means you can optimally load web fonts with no layout shift.
+
+<AppOnly>
+
+To start using `next/font`, import it from [`next/font/local`](#local-fonts) or [`next/font/google`](#google-fonts), call it as a function with the appropriate options, and set the `className` of the element you want to apply the font to. For example:
+
+```tsx filename="app/layout.tsx" highlight={1,3-5,9} switcher
+import { Geist } from 'next/font/google'
+
+const geist = Geist({
+  subsets: ['latin'],
+})
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={geist.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+```jsx filename="app/layout.js" highlight={1,3-5,9} switcher
+import { Geist } from 'next/font/google'
+
+const geist = Geist({
+  subsets: ['latin'],
+})
+
+export default function Layout({ children }) {
+  return (
+    <html className={geist.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+Fonts are scoped to the component they're used in. To apply a font to your entire application, add it to the [Root Layout](/docs/app/api-reference/file-conventions/layout#root-layout).
+
+</AppOnly>
+
+<PagesOnly>
+
+To start using `next/font`, import it from [`next/font/local`](#local-fonts) or [`next/font/google`](#google-fonts), call it as a function with the appropriate options, and set the `className` of the element you want to apply the font to. For example, you can apply fonts globally in your [Custom App](/docs/pages/building-your-application/routing/custom-app) (`pages/_app`):
+
+```tsx filename="pages/_app.tsx" highlight={1,4-6,10} switcher
+import { Geist } from 'next/font/google'
+import type { AppProps } from 'next/app'
+
+const geist = Geist({
+  subsets: ['latin'],
+})
+
+export default function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <main className={geist.className}>
+      <Component {...pageProps} />
+    </main>
+  )
+}
+```
+
+```jsx filename="pages/_app.js" highlight={1,3-5,9} switcher
+import { Geist } from 'next/font/google'
+
+const geist = Geist({
+  subsets: ['latin'],
+})
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <main className={geist.className}>
+      <Component {...pageProps} />
+    </main>
+  )
+}
+```
+
+</PagesOnly>
+
+## Google fonts
+
+You can automatically self-host any Google Font. Fonts are included as static assets and served from the same domain as your deployment, meaning no requests are sent to Google by the browser when the user visits your site.
+
+To start using a Google Font, import your chosen font from `next/font/google`:
+
+<AppOnly>
+
+```tsx filename="app/layout.tsx" switcher
+import { Geist } from 'next/font/google'
+
+const geist = Geist({
+  subsets: ['latin'],
+})
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" className={geist.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+```jsx filename="app/layout.js" switcher
+import { Geist } from 'next/font/google'
+
+const geist = Geist({
+  subsets: ['latin'],
+})
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" className={geist.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+</AppOnly>
+
+<PagesOnly>
+
+```tsx filename="pages/_app.tsx" switcher
+import { Geist } from 'next/font/google'
+import type { AppProps } from 'next/app'
+
+const geist = Geist({
+  subsets: ['latin'],
+})
+
+export default function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <main className={geist.className}>
+      <Component {...pageProps} />
+    </main>
+  )
+}
+```
+
+```jsx filename="pages/_app.js" switcher
+import { Geist } from 'next/font/google'
+
+const geist = Geist({
+  subsets: ['latin'],
+})
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <main className={geist.className}>
+      <Component {...pageProps} />
+    </main>
+  )
+}
+```
+
+</PagesOnly>
+
+We recommend using [variable fonts](https://fonts.google.com/variablefonts) for the best performance and flexibility. But if you can't use a variable font, you will need to specify a weight:
+
+<AppOnly>
+
+```tsx filename="app/layout.tsx" highlight={4} switcher
+import { Roboto } from 'next/font/google'
+
+const roboto = Roboto({
+  weight: '400',
+  subsets: ['latin'],
+})
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" className={roboto.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+```jsx filename="app/layout.js"  highlight={4} switcher
+import { Roboto } from 'next/font/google'
+
+const roboto = Roboto({
+  weight: '400',
+  subsets: ['latin'],
+})
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" className={roboto.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+</AppOnly>
+
+<PagesOnly>
+
+```tsx filename="pages/_app.tsx" highlight={5} switcher
+import { Roboto } from 'next/font/google'
+import type { AppProps } from 'next/app'
+
+const roboto = Roboto({
+  weight: '400',
+  subsets: ['latin'],
+})
+
+export default function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <main className={roboto.className}>
+      <Component {...pageProps} />
+    </main>
+  )
+}
+```
+
+```jsx filename="pages/_app.js" highlight={4} switcher
+import { Roboto } from 'next/font/google'
+
+const roboto = Roboto({
+  weight: '400',
+  subsets: ['latin'],
+})
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <main className={roboto.className}>
+      <Component {...pageProps} />
+    </main>
+  )
+}
+```
+
+</PagesOnly>
+
+## Local fonts
+
+<AppOnly>
+
+To use a local font, import the `localFont` function from `next/font/local` and specify the [`src`](/docs/app/api-reference/components/font#src) of your local font file. The path is resolved relative to the file where `localFont` is called. Fonts can be stored anywhere in the project, including the [`public`](/docs/app/api-reference/file-conventions/public-folder) folder or co-located inside the `app` folder. For example, to use a font stored in `app/fonts/`:
+
+```tsx filename="app/layout.tsx" switcher
+import localFont from 'next/font/local'
+
+const myFont = localFont({
+  src: './my-font.woff2',
+})
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" className={myFont.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+```jsx filename="app/layout.js" switcher
+import localFont from 'next/font/local'
+
+const myFont = localFont({
+  src: './my-font.woff2',
+})
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en" className={myFont.className}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+</AppOnly>
+
+<PagesOnly>
+
+To use a local font, import your font from `next/font/local` and specify the [`src`](/docs/pages/api-reference/components/font#src) of your local font file. Fonts can be stored in the [`public`](/docs/pages/api-reference/file-conventions/public-folder) folder or inside the `pages` folder. For example:
+
+```tsx filename="pages/_app.tsx" switcher
+import localFont from 'next/font/local'
+import type { AppProps } from 'next/app'
+
+const myFont = localFont({
+  src: './my-font.woff2',
+})
+
+export default function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <main className={myFont.className}>
+      <Component {...pageProps} />
+    </main>
+  )
+}
+```
+
+```jsx filename="pages/_app.js" switcher
+import localFont from 'next/font/local'
+
+const myFont = localFont({
+  src: './my-font.woff2',
+})
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <main className={myFont.className}>
+      <Component {...pageProps} />
+    </main>
+  )
+}
+```
+
+</PagesOnly>
+
+If you want to use multiple files for a single font family, `src` can be an array:
+
+```js
+const roboto = localFont({
+  src: [
+    {
+      path: './Roboto-Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: './Roboto-Italic.woff2',
+      weight: '400',
+      style: 'italic',
+    },
+    {
+      path: './Roboto-Bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+    {
+      path: './Roboto-BoldItalic.woff2',
+      weight: '700',
+      style: 'italic',
+    },
+  ],
+})
+```
+
+
+========== 01-getting-started\11-css.md ==========
+
+---
+title: CSS
+description: Learn about the different ways to add CSS to your application, including Tailwind CSS, CSS Modules, Global CSS, and more.
+related:
+  title: Next Steps
+  description: Learn more about the alternatives ways you can use CSS in your application.
+  links:
+    - app/guides/tailwind-v3-css
+    - app/guides/sass
+    - app/guides/css-in-js
+---
+
+Next.js provides several ways to style your application using CSS, including:
+
+- [Tailwind CSS](#tailwind-css)
+- [CSS Modules](#css-modules)
+- [Global CSS](#global-css)
+- [External Stylesheets](#external-stylesheets)
+- [Sass](/docs/app/guides/sass)
+- [CSS-in-JS](/docs/app/guides/css-in-js)
+
+## Tailwind CSS
+
+[Tailwind CSS](https://tailwindcss.com/) is a utility-first CSS framework that provides low-level utility classes to build custom designs.
+
+<AppOnly>
+
+Install Tailwind CSS:
+
+```bash package="pnpm"
+pnpm add -D tailwindcss @tailwindcss/postcss
+```
+
+```bash package="npm"
+npm install -D tailwindcss @tailwindcss/postcss
+```
+
+```bash package="yarn"
+yarn add -D tailwindcss @tailwindcss/postcss
+```
+
+```bash package="bun"
+bun add -D tailwindcss @tailwindcss/postcss
+```
+
+Add the PostCSS plugin to your `postcss.config.mjs` file:
+
+```js filename="postcss.config.mjs"
+export default {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+}
+```
+
+Import Tailwind in your global CSS file:
+
+```css filename="app/globals.css"
+@import 'tailwindcss';
+```
+
+Import the CSS file in your root layout:
+
+```tsx filename="app/layout.tsx" switcher
+import './globals.css'
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+```jsx filename="app/layout.js" switcher
+import './globals.css'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+Now you can start using Tailwind's utility classes in your application:
+
+```tsx filename="app/page.tsx" switcher
+export default function Page() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <h1 className="text-4xl font-bold">Welcome to Next.js!</h1>
+    </main>
+  )
+}
+```
+
+```jsx filename="app/page.js" switcher
+export default function Page() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <h1 className="text-4xl font-bold">Welcome to Next.js!</h1>
+    </main>
+  )
+}
+```
+
+</AppOnly>
+
+<PagesOnly>
+
+Install Tailwind CSS:
+
+```bash package="pnpm"
+pnpm add -D tailwindcss @tailwindcss/postcss
+```
+
+```bash package="npm"
+npm install -D tailwindcss @tailwindcss/postcss
+```
+
+```bash package="yarn"
+yarn add -D tailwindcss @tailwindcss/postcss
+```
+
+```bash package="bun"
+bun add -D tailwindcss @tailwindcss/postcss
+```
+
+Add the PostCSS plugin to your `postcss.config.mjs` file:
+
+```js filename="postcss.config.mjs"
+export default {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+}
+```
+
+Import Tailwind in your global CSS file:
+
+```css filename="styles/globals.css"
+@import 'tailwindcss';
+```
+
+Import the CSS file in your `pages/_app.js` file:
+
+```jsx filename="pages/_app.js"
+import '@/styles/globals.css'
+
+export default function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />
+}
+```
+
+Now you can start using Tailwind's utility classes in your application:
+
+```tsx filename="pages/index.tsx" switcher
+export default function Home() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <h1 className="text-4xl font-bold">Welcome to Next.js!</h1>
+    </main>
+  )
+}
+```
+
+```jsx filename="pages/index.js" switcher
+export default function Home() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <h1 className="text-4xl font-bold">Welcome to Next.js!</h1>
+    </main>
+  )
+}
+```
+
+</PagesOnly>
+
+> **Good to know:** If you need broader browser support for very old browsers, see the [Tailwind CSS v3 setup instructions](/docs/app/guides/tailwind-v3-css).
+
+## CSS Modules
+
+CSS Modules locally scope CSS by generating unique class names. This allows you to use the same class in different files without worrying about naming collisions.
+
+<AppOnly>
+
+To start using CSS Modules, create a new file with the extension `.module.css` and import it into any component inside the `app` directory:
+
+```css filename="app/blog/blog.module.css"
+.blog {
+  padding: 24px;
+}
+```
+
+```tsx filename="app/blog/page.tsx" switcher
+import styles from './blog.module.css'
+
+export default function Page() {
+  return <main className={styles.blog}></main>
+}
+```
+
+```jsx filename="app/blog/page.js" switcher
+import styles from './blog.module.css'
+
+export default function Page() {
+  return <main className={styles.blog}></main>
+}
+```
+
+</AppOnly>
+
+<PagesOnly>
+
+To start using CSS Modules, create a new file with the extension `.module.css` and import it into any component inside the `pages` directory:
+
+```css filename="styles/blog.module.css"
+.blog {
+  padding: 24px;
+}
+```
+
+```tsx filename="pages/blog/index.tsx" switcher
+import styles from '@/styles/blog.module.css'
+
+export default function Page() {
+  return <main className={styles.blog}></main>
+}
+```
+
+```jsx filename="pages/blog/index.js" switcher
+import styles from '@/styles/blog.module.css'
+
+export default function Page() {
+  return <main className={styles.blog}></main>
+}
+```
+
+</PagesOnly>
+
+## Global CSS
+
+You can use global CSS to apply styles across your application.
+
+<AppOnly>
+
+Create a `app/global.css` file and import it in the root layout to apply the styles to **every route** in your application:
+
+```css filename="app/global.css"
+body {
+  padding: 20px 20px 60px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+```
+
+```tsx filename="app/layout.tsx" switcher
+// These styles apply to every route in the application
+import './global.css'
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+```jsx filename="app/layout.js" switcher
+// These styles apply to every route in the application
+import './global.css'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+> **Good to know:** Global styles can be imported into any layout, page, or component inside the `app` directory. However, since Next.js uses React's built-in support for stylesheets to integrate with Suspense, this currently does not remove stylesheets as you navigate between routes which can lead to conflicts. We recommend using global styles for _truly_ global CSS (like Tailwind's base styles), [Tailwind CSS](#tailwind-css) for component styling, and [CSS Modules](#css-modules) for custom scoped CSS when needed.
+
+</AppOnly>
+
+<PagesOnly>
+
+Import the stylesheet in the `pages/_app.js` file to apply the styles to **every route** in your application:
+
+```jsx filename="pages/_app.js"
+import '@/styles/global.css'
+
+export default function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />
+}
+```
+
+Due to the global nature of stylesheets, and to avoid conflicts, you should import them inside [`pages/_app.js`](/docs/pages/building-your-application/routing/custom-app).
+
+</PagesOnly>
+
+## External stylesheets
+
+<AppOnly>
+
+Stylesheets published by external packages can be imported anywhere in the `app` directory, including colocated components:
+
+```tsx filename="app/layout.tsx" switcher
+import 'bootstrap/dist/css/bootstrap.css'
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className="container">{children}</body>
+    </html>
+  )
+}
+```
+
+```jsx filename="app/layout.js" switcher
+import 'bootstrap/dist/css/bootstrap.css'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className="container">{children}</body>
+    </html>
+  )
+}
+```
+
+> **Good to know:** In React 19, `<link rel="stylesheet" href="..." />` can also be used. See the [React `link` documentation](https://react.dev/reference/react-dom/components/link) for more information.
+
+</AppOnly>
+
+<PagesOnly>
+
+Next.js allows you to import CSS files from a JavaScript file. This is possible because Next.js extends the concept of [`import`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/import) beyond JavaScript.
+
+### Import styles from `node_modules`
+
+Since Next.js **9.5.4**, importing a CSS file from `node_modules` is permitted anywhere in your application.
+
+For global stylesheets, like `bootstrap` or `nprogress`, you should import the file inside `pages/_app.js`. For example:
+
+```jsx filename="pages/_app.js"
+import 'bootstrap/dist/css/bootstrap.css'
+
+export default function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />
+}
+```
+
+To import CSS required by a third-party component, you can do so in your component. For example:
+
+```jsx filename="components/example-dialog.js"
+import { useState } from 'react'
+import { Dialog } from '@reach/dialog'
+import VisuallyHidden from '@reach/visually-hidden'
+import '@reach/dialog/styles.css'
+
+function ExampleDialog(props) {
+  const [showDialog, setShowDialog] = useState(false)
+  const open = () => setShowDialog(true)
+  const close = () => setShowDialog(false)
+
+  return (
+    <div>
+      <button onClick={open}>Open Dialog</button>
+      <Dialog isOpen={showDialog} onDismiss={close}>
+        <button className="close-button" onClick={close}>
+          <VisuallyHidden>Close</VisuallyHidden>
+          <span aria-hidden>×</span>
+        </button>
+        <p>Hello there. I am a dialog</p>
+      </Dialog>
+    </div>
+  )
+}
+```
+
+</PagesOnly>
+
+## Ordering and Merging
+
+Next.js optimizes CSS during production builds by automatically chunking (merging) stylesheets. The **order of your CSS** depends on the **order you import styles in your code**.
+
+For example, `base-button.module.css` will be ordered before `page.module.css` since `<BaseButton>` is imported before `page.module.css`:
+
+```tsx filename="page.tsx" switcher
+import { BaseButton } from './base-button'
+import styles from './page.module.css'
+
+export default function Page() {
+  return <BaseButton className={styles.primary} />
+}
+```
+
+```jsx filename="page.js" switcher
+import { BaseButton } from './base-button'
+import styles from './page.module.css'
+
+export default function Page() {
+  return <BaseButton className={styles.primary} />
+}
+```
+
+```tsx filename="base-button.tsx" switcher
+import styles from './base-button.module.css'
+
+export function BaseButton() {
+  return <button className={styles.primary} />
+}
+```
+
+```jsx filename="base-button.js" switcher
+import styles from './base-button.module.css'
+
+export function BaseButton() {
+  return <button className={styles.primary} />
+}
+```
+
+### Recommendations
+
+To keep CSS ordering predictable:
+
+- Try to contain CSS imports to a single JavaScript or TypeScript entry file
+- Import global styles and Tailwind stylesheets in the root of your application.
+- **Use Tailwind CSS** for most styling needs as it covers common design patterns with utility classes.
+- Use CSS Modules for component-specific styles when Tailwind utilities aren't sufficient.
+- Use a consistent naming convention for your CSS modules. For example, using `<name>.module.css` over `<name>.tsx`.
+- Extract shared styles into shared components to avoid duplicate imports.
+- Turn off linters or formatters that auto-sort imports like ESLint’s [`sort-imports`](https://eslint.org/docs/latest/rules/sort-imports).
+- You can use the [`cssChunking`](/docs/app/api-reference/config/next-config-js/cssChunking) option in `next.config.js` to control how CSS is chunked.
+
+## Development vs Production
+
+- In development (`next dev`), CSS updates apply instantly with [Fast Refresh](/docs/architecture/fast-refresh).
+- In production (`next build`), all CSS files are automatically concatenated into **many minified and code-split** `.css` files, ensuring the minimal amount of CSS is loaded for a route.
+- CSS still loads with JavaScript disabled in production, but JavaScript is required in development for Fast Refresh.
+- CSS ordering can behave differently in development, always ensure to check the build (`next build`) to verify the final CSS order.
+
+
+========== 03-api-reference\05-config\01-next-config-js\turbopackLocalPostcssConfig.md ==========
+
+---
+title: turbopackLocalPostcssConfig
+description: Enable per-directory PostCSS config resolution in Turbopack so that the config closest to each CSS file takes precedence over the project root config.
+---
+
+The `turbopackLocalPostcssConfig` option changes how Turbopack resolves `postcss.config.js` files. When enabled, Turbopack searches for the config starting from the CSS file's own directory first, then falls back to the project root. By default, Turbopack checks the project root first, meaning a root-level `postcss.config.js` always takes precedence over configs in subdirectories.
+
+This option is only relevant when using Turbopack (`next dev` or `next build`).
+
+## Usage
+
+```ts filename="next.config.ts" switcher
+import type { NextConfig } from 'next'
+
+const nextConfig: NextConfig = {
+  experimental: {
+    turbopackLocalPostcssConfig: true,
+  },
+}
+
+export default nextConfig
+```
+
+```js filename="next.config.js" switcher
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    turbopackLocalPostcssConfig: true,
+  },
+}
+
+module.exports = nextConfig
+```
+
+## Behavior
+
+| Setting           | Config resolution order             |
+| ----------------- | ----------------------------------- |
+| `false` (default) | Project root → CSS file's directory |
+| `true`            | CSS file's directory → project root |
+
+With the default behavior, a `postcss.config.js` at the project root is used for all CSS files, and per-directory configs are only applied if no root config exists. Enabling `turbopackLocalPostcssConfig` reverses this: per-directory configs take precedence, and the root config serves as the fallback.
+
+## Example
+
+This is useful for projects that need different PostCSS transforms in different directories, such as a monorepo with multiple apps or design system packages:
+
+```
+my-app/
+├── postcss.config.js          ← fallback (applied if no local config is found)
+├── app/
+│   └── page.module.css        ← uses root config
+└── packages/
+    └── ui/
+        ├── postcss.config.js  ← takes precedence for files in this directory
+        └── button.module.css  ← uses packages/ui/postcss.config.js
+```
+
+## Version History
+
+| Version   | Changes                                   |
+| --------- | ----------------------------------------- |
+| `v16.3.0` | `turbopackLocalPostcssConfig` introduced. |
+

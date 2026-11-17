@@ -1,0 +1,528 @@
+﻿PROJECT STRUCTURE
+=================
+
+PROJECT PATH:
+Y:\Desktop\سایت voip (1)\daal-ops
+
+FILES AND FOLDERS:
+[DIR]  
+[DIR]  
+[DIR]  
+[DIR]  
+[DIR]  
+[DIR]  
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[DIR]  
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[DIR]  
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+[FILE] 
+
+PACKAGE.JSON:
+{
+  "name": "daal-ops",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+
+GIT STATUS:
+Git repository not detected
+
+MAIN SOURCE FILES:
+
+--- app\page.tsx ---
+import { Consult } from "@/components/consult";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
+import { Hero } from "@/components/hero";
+import { Process } from "@/components/process";
+import { Services } from "@/components/services";
+import { WhyUs } from "@/components/why-us";
+
+export default function Home() {
+  return (
+    <>
+      <Header />
+      <main id="main-content" className="flex-1">
+        <Hero />
+        <Services />
+        <WhyUs />
+        <Process />
+        <Consult />
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+--- app\layout.tsx ---
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "DAAL OPS | VoIPØŒ Ø²ÛŒØ±Ø³Ø§Ø®Øª Ø´Ø¨Ú©Ù‡ Ùˆ Ø³Ø±ÙˆØ±ØŒ DevOps Ùˆ Ø§ØªÙˆÙ…Ø§Ø³ÛŒÙˆÙ†",
+  description:
+    "DAAL OPSØ› Ø·Ø±Ø§Ø­ÛŒØŒ Ø§Ø³ØªÙ‚Ø±Ø§Ø± Ùˆ Ù†Ú¯Ù‡Ø¯Ø§Ø±ÛŒ Ø³ÛŒØ³ØªÙ…â€ŒÙ‡Ø§ÛŒ ØªÙ„ÙÙ†ÛŒ VoIPØŒ Ø²ÛŒØ±Ø³Ø§Ø®Øª Ø´Ø¨Ú©Ù‡ Ùˆ Ø³Ø±ÙˆØ±ØŒ DevOps Ùˆ Ø§ØªÙˆÙ…Ø§Ø³ÛŒÙˆÙ† Ø¨Ø±Ø§ÛŒ Ø³Ø§Ø²Ù…Ø§Ù†â€ŒÙ‡Ø§. Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ù…Ø´Ø§ÙˆØ±Ù‡ Ø«Ø¨Øª Ú©Ù†ÛŒØ¯.",
+};
+
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="fa"
+      dir="rtl"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand-400 focus:px-4 focus:py-2 focus:text-ink-950"
+        >
+          Ù¾Ø±Ø´ Ø¨Ù‡ Ù…Ø­ØªÙˆØ§ÛŒ Ø§ØµÙ„ÛŒ
+        </a>
+        {children}
+      </body>
+    </html>
+  );
+}
+
+--- app\globals.css ---
+@import "tailwindcss";
+
+@font-face {
+  font-family: "RooyinLocal";
+  src: url("/fonts/RooyinFree-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RooyinLocal";
+  src: url("/fonts/RooyinFree-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KharazmiLocal";
+  src: url("/fonts/IRAN-Kharazmi.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RoundedLocal";
+  src: url("/fonts/IRAN-Rounded.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Ø±Ù†Ú¯â€ŒÙ‡Ø§ÛŒ Ù¾Ø§ÛŒÙ‡ */
+  --background: #050a13;
+  --foreground: #e6edf6;
+  --brand: #38d4ea;
+
+  /* ÙÙˆÙ†Øªâ€ŒÙ‡Ø§ */
+  --font-body: "RooyinLocal", Tahoma, "Segoe UI", sans-serif;
+  --font-display: "KharazmiLocal", "RooyinLocal", Tahoma, serif;
+  --font-accent: "RoundedLocal", "RooyinLocal", Tahoma, sans-serif;
+
+  /* Ù¾Ø§Ù„Øª Ø¨Ù†ÙØ´/Ù†ÛŒÙ„ÛŒ Ø·Ø±Ø­ (ØªÙ‚Ø±ÛŒØ¨ÛŒØ› Ø¨Ø§ Ú©Ø¯ Ø±Ù†Ú¯ Figma Ø¬Ø§ÛŒÚ¯Ø²ÛŒÙ† Ø´ÙˆØ¯) */
+  --indigo-950: #120a3a;
+  --indigo-900: #1b0f5c;
+  --indigo-800: #2a1a8a;
+  --indigo-700: #3b2bb5;
+  --violet-500: #6d4aff;
+  --blue-500: #2f7bff;
+  --cyan-400: #38d4ea;
+
+  /* Ø³Ø·ÙˆØ­ (Ø§Ù„ÙˆÛŒØ´Ù†) */
+  --surface-1: rgba(255, 255, 255, 0.04);
+  --surface-2: rgba(255, 255, 255, 0.07);
+  --surface-3: rgba(255, 255, 255, 0.11);
+  --border-1: rgba(255, 255, 255, 0.1);
+  --border-2: rgba(255, 255, 255, 0.18);
+  --border-accent: rgba(56, 212, 234, 0.45);
+
+  /* Ø³Ø§ÛŒÙ‡â€ŒÙ‡Ø§ */
+  --shadow-1: 0 1px 2px rgba(5, 10, 40, 0.3);
+  --shadow-2: 0 8px 24px -8px rgba(5, 10, 40, 0.5);
+  --shadow-3: 0 18px 40px -12px rgba(5, 10, 40, 0.65);
+  --glow-accent: 0 0 0 1px rgba(56, 212, 234, 0.35),
+    0 10px 36px -10px rgba(56, 212, 234, 0.45);
+
+  /* Ø­Ø±Ú©Øª */
+  --motion-instant: 120ms;
+  --motion-fast: 180ms;
+  --motion-normal: 260ms;
+  --motion-slow: 420ms;
+  --motion-enter: 560ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --lift-card: -4px;
+
+  /* Ù„Ø§ÛŒÙ‡â€ŒÙ‡Ø§ */
+  --z-header: 50;
+  --z-overlay: 100;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  --color-ink-950: #050a13;
+  --color-ink-900: #09111f;
+  --color-ink-800: #0f1a2e;
+  --color-brand-300: #7be8f5;
+  --color-brand-400: #38d4ea;
+  --color-brand-500: #14b8d4;
+  --color-brand-600: #0e94ad;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+section[id] {
+  scroll-margin-top: 5rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  line-height: 1.9;
+}
+
+/* ÙÙ‚Ø· ØªÛŒØªØ±Ù‡Ø§ÛŒ Ø§ØµÙ„ÛŒØ› Kharazmi ÛŒÚ© ÙˆØ²Ù† Ø¯Ø§Ø±Ø¯ */
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+/* ØªÛŒØªØ±Ù‡Ø§ÛŒ Ú©ÙˆÚ†Ú©â€ŒØªØ± Ø¨Ø§ ÙÙˆÙ†Øª Ù…ØªÙ† */
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-body);
+}
+
+.font-accent {
+  font-family: var(--font-accent);
+  font-weight: 400;
+}
+
+::selection {
+  background: rgba(56, 212, 234, 0.3);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+
+/* ---------- ÙˆØ±ÙˆØ¯ Hero ---------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up var(--motion-enter) var(--ease-out) both;
+}
+
+.anim-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.anim-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.anim-delay-3 {
+  animation-delay: 0.3s;
+}
+
+/* ---------- Reveal Ù‡Ù†Ú¯Ø§Ù… Ø§Ø³Ú©Ø±ÙˆÙ„ ----------
+   Ø¨Ø¯ÙˆÙ† JavaScript Ù…Ø­ØªÙˆØ§ Ø¹Ø§Ø¯ÛŒ Ø¯ÛŒØ¯Ù‡ Ù…ÛŒâ€ŒØ´ÙˆØ¯: Ø­Ø§Ù„Øª Ù¾Ù†Ù‡Ø§Ù† ÙÙ‚Ø· ÙˆÙ‚ØªÛŒ ÙØ¹Ø§Ù„ Ø§Ø³Øª
+   Ú©Ù‡ Ú©Ø§Ù…Ù¾ÙˆÙ†Ù†Øª <Reveal> Ø¨Ø§ Ú©Ù„Ø§Ø³ js-reveal Ø¢Ù…Ø§Ø¯Ù‡ Ø´Ø¯Ù‡ Ø¨Ø§Ø´Ø¯. */
+.js-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity var(--motion-enter) var(--ease-out),
+    transform var(--motion-enter) var(--ease-out);
+  transition-delay: calc(var(--reveal-index, 0) * 70ms);
+}
+
+.js-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Ø¯Ú©Ù…Ù‡ Ù…Ø´ØªØ±Ú© ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.75rem 1.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-normal) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+  transition-duration: var(--motion-instant);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--blue-500), var(--cyan-400));
+  color: #04101c;
+  box-shadow: var(--shadow-2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-3), var(--glow-accent);
+}
+
+.btn-primary:active {
+  box-shadow: var(--shadow-1);
+}
+
+.btn-secondary {
+  border: 1px solid var(--border-2);
+  background: var(--surface-1);
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  border-color: var(--border-accent);
+  background: var(--surface-2);
+  color: var(--brand);
+}
+
+/* ---------- Ø¯Ø±Ø®Ø´Ø´ Ø¯Ù†Ø¨Ø§Ù„â€ŒÚ©Ù†Ù†Ø¯Ù‡ Ø§Ø´Ø§Ø±Ù‡â€ŒÚ¯Ø± ----------
+   Ù…Ø®ØªØµØ§Øª Ø§Ø² JavaScript Ø¯Ø± --pointer-x Ùˆ --pointer-y Ù†ÙˆØ´ØªÙ‡ Ù…ÛŒâ€ŒØ´ÙˆØ¯.
+   ÙÙ‚Ø· Ø±ÙˆÛŒ Ø¯Ø³ØªÚ¯Ø§Ù‡â€ŒÙ‡Ø§ÛŒÛŒ Ú©Ù‡ hover ÙˆØ§Ù‚Ø¹ÛŒ Ø¯Ø§Ø±Ù†Ø¯ ÙØ¹Ø§Ù„ Ø§Ø³Øª. */
+.pointer-glow {
+  position: relative;
+  isolation: isolate;
+}
+
+.pointer-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    360px circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+    rgba(56, 212, 234, 0.16),
+    transparent 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-normal) var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pointer-glow:hover::before {
+    opacity: 1;
+  }
+}
+
+/* ---------- Ø­Ø±Ú©Øªâ€ŒÙ‡Ø§ÛŒ ØªØ²Ø¦ÛŒÙ†ÛŒ ---------- */
+@keyframes flow {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+.flow-line {
+  stroke-dasharray: 6 8;
+  animation: flow 1.4s linear infinite;
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.soft-pulse {
+  animation: soft-pulse 4s ease-in-out infinite;
+}
+
+/* ---------- Ú©Ø§Ù‡Ø´ Ø­Ø±Ú©Øª ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  .js-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+--- next.config.ts ---
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  experimental: {
+    agentFeedback: true,
+  },
+  cacheComponents: true,
+  partialPrefetching: true,
+  turbopack: {
+    rules: {
+      "*.css": {
+        loaders: ["@tailwindcss/turbopack"],
+        as: "*.css",
+      },
+    },
+  },
+};
+
+export default nextConfig;
+
+--- AGENTS.md ---
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes â€” APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` â€” verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
