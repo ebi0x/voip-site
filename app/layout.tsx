@@ -1,4 +1,6 @@
+
 import type { Metadata } from "next";
+import AuthPopup from "@/components/AuthPopup";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -32,7 +34,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           پرش به محتوای اصلی
         </a>
+
         {children}
+
+        <AuthPopup />
       </body>
     </html>
   );

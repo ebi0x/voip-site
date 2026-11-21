@@ -1,0 +1,310 @@
+﻿
+function formatTime(time: number) {
+  return new Date(time).toLocaleTimeString("fa-IR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export default function ConsultationPage() {
+  const [form, setForm] = useState<Profile>(emptyProfile);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [consent, setConsent] = useState(false);
+  const [error, setError] = useState("");
+  const [draft, setDraft] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const nextId = useRef(1);
+  const stickToBottom = useRef(true);
+
+  const firstName =
+    profile?.fullName.trim().split(/\s+/)[0] ?? "دوست من";
+
+  function change<K extends keyof Profile>(
+    field: K,
+    value: Profile[K]
+  ) {
+    setForm((previous) => ({ ...previous, [field]: value }));
+  }
+
+  function welcomeMessage(data: Profile): Message {
+    const name = data.fullName.trim().split(/\s+/)[0];
+    const company = data.companyName.trim();
+
+    return {
+      id: nextId.current++,
+      role: "assistant",
+      content: `سلام ${name} جان! 👋
+
+من غلامم، راهنمای خدمات DAAL OPS.
+
+${
+  company
+    ? `خوشحالم با مجموعه «${company}» آشنا شدم.`
+    : "خوشحالم باهات آشنا شدم."
+}
+
+اینجا می‌تونیم درباره تلفن سازمانی، خدمات شبکه و سرور یا انتخاب پکیج مناسب صحبت کنیم.
+
+برای شروع، یکی از کارت‌های پیشنهادی رو انتخاب کن یا سؤالت رو پایین صفحه بنویس. 💜`,
+      time: Date.now(),
+    };
+  }
+
+  async function submitProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    if (form.fullName.trim().length < 2) {
+      setError("نام و نام خانوادگی رو درست وارد کن.");
+      return;
+    }
+
+    if (!/^[+\d\s()-]{7,20}$/.test(form.phone.trim())) {
+      setError("شماره تماس معتبر وارد کن.");
+      return;
+    }
+
+    if (!profile && !consent) {
+      setError("برای ادامه، تأیید ذخیره اطلاعات لازمه.");
+      return;
+    }
+
+    const saved = {
+      ...form,
+      fullName: form.fullName.trim(),
+      phone: form.phone.trim(),
+    };
+
+    try {
+      const response = await fetch("/api/customers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(saved),
+      });
+
+      if (!response.ok) {
+        throw new Error("Registration failed");
+      }
+
+      setProfile(saved);
+      setEditing(false);
+      setMobileMenuOpen(false);
+
+      if (messages.length === 0) {
+        setMessages([welcomeMessage(saved)]);
+      }
+
+      stickToBottom.current = true;
+    } catch {
+      setError("ثبت اطلاعات انجام نشد. لطفاً دوباره تلاش کن.");
+    }
+  }
+  function sendMessage(value = draft) {
+    if (!profile) return;
+
+    const content = value.trim();
+    if (!content) return;
+
+    const time = Date.now();
+
+    const userMessage: Message = {
+      id: nextId.current++,
+      role: "user",
+      content,
+      time,
+    };
+
+    const assistantMessage: Message = {
+      id: nextId.current++,
+      role: "assistant",
+      content: answerQuestion(content, profile),
+      time,
+    };
+
+    stickToBottom.current = true;
+
+    setMessages((previous) => [
+      ...previous,
+      userMessage,
+      assistantMessage,
+    ]);
+
+    setDraft("");
+    setMobileMenuOpen(false);
+  }
+
+  function newChat() {
+    if (!profile) return;
+    setMessages([welcomeMessage(profile)]);
+    setDraft("");
+    setMobileMenuOpen(false);
+    stickToBottom.current = true;
+  }
+
+  function handleKeyDown(
+    event: KeyboardEvent<HTMLTextAreaElement>
+  ) {
+    const mobile = window.matchMedia(
+      "(max-width: 767px)"
+    ).matches;
+
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing &&
+      !mobile
+    ) {
+      event.preventDefault();
+      sendMessage();
+    }
+  }
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+
+    const styles = window.getComputedStyle(textarea);
+    const lineHeight = parseFloat(styles.lineHeight) || 28;
+    const padding =
+      (parseFloat(styles.paddingTop) || 0) +
+      (parseFloat(styles.paddingBottom) || 0);
+    const borders =
+      (parseFloat(styles.borderTopWidth) || 0) +
+      (parseFloat(styles.borderBottomWidth) || 0);
+
+    const maxHeight = Math.ceil(
+      lineHeight * 5 + padding + borders
+    );
+
+    const requiredHeight = textarea.scrollHeight;
+
+    textarea.style.height = `${Math.min(
+      requiredHeight,
+      maxHeight
+    )}px`;
+
+    textarea.style.overflowY =
+      requiredHeight > maxHeight + 1 ? "auto" : "hidden";
+
+    if (stickToBottom.current && messagesRef.current) {
+      messagesRef.current.scrollTop =
+        messagesRef.current.scrollHeight;
+    }
+  }, [draft, profile, editing]);
+
+  useLayoutEffect(() => {
+    const container = messagesRef.current;
+
+    if (container && stickToBottom.current) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    const viewport = window.visualViewport;
+
+    function updateHeight() {
+      if (!shell) return;
+
+      const mobile = window.matchMedia(
+        "(max-width: 767px)"
+      ).matches;
+
+      shell.style.height =
+        mobile && viewport
+          ? `${Math.round(viewport.height)}px`
+          : "100dvh";
+
+      if (stickToBottom.current && messagesRef.current) {
+        messagesRef.current.scrollTop =
+          messagesRef.current.scrollHeight;
+      }
+    }
+
+    updateHeight();
+
+    window.addEventListener("resize", updateHeight);
+    viewport?.addEventListener("resize", updateHeight);
+
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+      viewport?.removeEventListener("resize", updateHeight);
+    };
+  }, [profile, editing]);
+
+  const showForm = !profile || editing;
+
+  return (
+    <main
+      id="main-content"
+      dir="rtl"
+      className="min-h-[100dvh] bg-[#0b0a1d] text-white"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse at 90% 0%,rgba(104,60,220,.22),transparent 45%),radial-gradient(ellipse at 0% 100%,rgba(21,122,202,.13),transparent 48%)",
+      }}
+    >
+      {showForm ? (
+        <div className="mx-auto grid min-h-[100dvh] max-w-6xl items-center gap-10 px-4 py-8 lg:grid-cols-[.8fr_1.2fr] lg:px-8">
+          <div className="space-y-6 lg:sticky lg:top-10">
+            <Link
+              href="/"
+              className="inline-flex rounded-xl border border-white/10 px-4 py-2 text-xs text-white/65 transition hover:bg-white/10"
+            >
+              بازگشت به DAAL OPS
+            </Link>
+
+            <Avatar large />
+
+            <div>
+              <p className="text-xs font-bold tracking-[.18em] text-cyan-300">
+                MEET GHOLAM
+              </p>
+
+              <h1 className="mt-3 text-3xl font-black leading-[1.7] sm:text-4xl">
+                {editing
+                  ? "اطلاعاتت رو به‌روز کن"
+                  : "سلام! من غلامم 👋"}
+              </h1>
+
+              <p className="mt-3 max-w-md text-sm leading-9 text-white/60">
+                {editing
+                  ? "اطلاعات جدیدت رو ثبت کن تا راهنمایی‌های بعدی دقیق‌تر باشن."
+                  : "قبل از اینکه گپ بزنیم، یکم باهات آشنا بشم. اسمت، شغلت و کسب‌وکارت رو بدونم، می‌تونم شخصی‌تر راهنماییت کنم."}
+              </p>
+            </div>
+
+            <div className="space-y-3 text-xs text-white/65">
+              <p>✦ بدون رمز عبور و کد تأیید</p>
+              <p>✦ گفت‌وگوی متناسب با اطلاعات اولیه شما</p>
+              <p>✦ آشنایی با خدمات و پکیج‌های دال آپس</p>
+            </div>
+
+            <p className="max-w-sm text-xs leading-7 text-amber-100/65">
+              حالت تست: اطلاعات فرم فقط در حافظه همین صفحه
+              نگه داشته می‌شن و به سرور ارسال نمی‌شن.
+            </p>
+          </div>
+
+          <form
+            onSubmit={submitProfile}
+            className="rounded-[28px] border border-white/10 bg-[#15122c]/90 p-5 shadow-[0_30px_90px_rgba(0,0,0,.25)] backdrop-blur-xl sm:p-8"
+          >
+            <div className="mb-7 flex items-center justify-between gap-3 border-b border-white/10 pb-5">
+              <div>
+                <p className="text-xs text-cyan-300">
+                  پروفایل شخصی
+                </p>

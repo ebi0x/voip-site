@@ -1,0 +1,74 @@
+﻿import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    const fields = [
+      "fullName", "phone", "email", "companyName",
+      "organizationType", "jobTitle", "industry",
+      "teamSize", "interest"
+    ] as const;
+
+    const data: Record<string, string> = {};
+
+    for (const field of fields) {
+      if (
+        body?.[field] !== undefined &&
+        typeof body[field] !== "string"
+      ) {
+        return NextResponse.json(
+          { error: "Invalid profile data" },
+          { status: 400 }
+        );
+      }
+
+      data[field] = (body?.[field] ?? "").trim();
+    }
+
+    if (
+      data.fullName.length < 2 ||
+      data.fullName.length > 150 ||
+      !/^[+\d\s()-]{7,20}$/.test(data.phone)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid name or phone" },
+        { status: 400 }
+      );
+    }
+
+    const result = await db.query(
+      `INSERT INTO customers (
+        full_name, phone, email, company_name,
+        organization_type, job_title, industry,
+        team_size, interest
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
+      ) RETURNING id`,
+      [
+        data.fullName,
+        data.phone,
+        data.email || null,
+        data.companyName || null,
+        data.organizationType || null,
+        data.jobTitle || null,
+        data.industry || null,
+        data.teamSize || null,
+        data.interest || null
+      ]
+    );
+
+    return NextResponse.json(
+      { success: true, customerId: result.rows[0].id },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Customer registration failed:", error);
+
+    return NextResponse.json(
+      { error: "Registration failed" },
+      { status: 500 }
+    );
+  }
+}

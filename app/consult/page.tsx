@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -336,6 +335,9 @@ export default function ConsultationPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [editing, setEditing] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [draft, setDraft] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -349,6 +351,41 @@ export default function ConsultationPage() {
 
   const firstName =
     profile?.fullName.trim().split(/\s+/)[0] ?? "دوست من";
+
+  useEffect(() => {
+    let active = true;
+    async function loadCustomer() {
+      try {
+        const response = await fetch("/api/auth/me", { cache: "no-store", credentials: "same-origin" });
+        if (!active) return;
+        if (!response.ok) { setAuthenticated(false); return; }
+        const data = await response.json();
+        const customer = data.customer;
+        if (!customer || typeof customer.full_name !== "string") { setAuthenticated(false); return; }
+        const savedProfile: Profile = {
+          fullName: customer.full_name,
+          phone: customer.phone ?? "",
+          email: customer.email ?? "",
+          companyName: customer.company_name ?? "",
+          organizationType: customer.organization_type ?? "",
+          jobTitle: customer.job_title ?? "",
+          industry: customer.industry ?? "",
+          teamSize: customer.team_size ?? "",
+          interest: customer.interest ?? "",
+        };
+        setAuthenticated(true);
+        setForm(savedProfile);
+        if (savedProfile.phone.trim()) {
+          setProfile(savedProfile);
+          setMessages((previous) => previous.length ? previous : [welcomeMessage(savedProfile)]);
+        }
+      } catch { if (active) setAuthenticated(false); }
+      finally { if (active) setAuthLoading(false); }
+    }
+    void loadCustomer();
+    window.addEventListener("daal-auth-changed", loadCustomer);
+    return () => { active = false; window.removeEventListener("daal-auth-changed", loadCustomer); };
+  }, []);
 
   function change<K extends keyof Profile>(
     field: K,
@@ -381,40 +418,42 @@ ${
     };
   }
 
-  function submitProfile(event: FormEvent<HTMLFormElement>) {
+  async function submitProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (saving) return;
     setError("");
-
-    if (form.fullName.trim().length < 2) {
-      setError("نام و نام خانوادگی رو درست وارد کن.");
-      return;
-    }
-
+    if (!authenticated) { setError("ابتدا وارد حساب کاربری شو."); return; }
     if (!/^[+\d\s()-]{7,20}$/.test(form.phone.trim())) {
-      setError("شماره تماس معتبر وارد کن.");
-      return;
+      setError("شماره تماس معتبر وارد کن."); return;
     }
-
     if (!profile && !consent) {
-      setError("برای ادامه، تأیید استفاده موقت از اطلاعات لازمه.");
-      return;
+      setError("برای ذخیره اطلاعات، تأییدت لازمه."); return;
     }
-
-    const saved = {
-      ...form,
-      fullName: form.fullName.trim(),
-      phone: form.phone.trim(),
-    };
-
-    setProfile(saved);
-    setEditing(false);
-    setMobileMenuOpen(false);
-
-    if (messages.length === 0) {
-      setMessages([welcomeMessage(saved)]);
-    }
-
-    stickToBottom.current = true;
+    const saved = { ...form, phone: form.phone.trim() };
+    setSaving(true);
+    try {
+      const response = await fetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          phone: saved.phone, email: saved.email,
+          companyName: saved.companyName,
+          organizationType: saved.organizationType,
+          jobTitle: saved.jobTitle, industry: saved.industry,
+          teamSize: saved.teamSize, interest: saved.interest,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "ذخیره اطلاعات انجام نشد.");
+      setProfile(saved);
+      setEditing(false);
+      setMobileMenuOpen(false);
+      if (messages.length === 0) setMessages([welcomeMessage(saved)]);
+      stickToBottom.current = true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "ثبت اطلاعات انجام نشد.");
+    } finally { setSaving(false); }
   }
 
   function sendMessage(value = draft) {
@@ -557,6 +596,25 @@ ${
 
   const showForm = !profile || editing;
 
+  if (authLoading) return (
+    <main id="main-content" dir="rtl" className="flex min-h-[100dvh] items-center justify-center bg-[#0b0a1d] text-white">
+      <p className="text-sm text-white/70">در حال بررسی حساب کاربری...</p>
+    </main>
+  );
+
+  if (!authenticated) return (
+    <main id="main-content" dir="rtl" className="flex min-h-[100dvh] items-center justify-center bg-[#0b0a1d] px-4 text-white">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#15122c] p-8 text-center">
+        <Avatar large />
+        <h1 className="mt-5 text-2xl font-bold">برای گفت‌وگو با غلام وارد شو</h1>
+        <p className="mt-3 text-sm leading-8 text-white/60">اطلاعات مشاوره به حساب اختصاصی خودت متصل می‌شه.</p>
+        <button type="button" onClick={() => window.dispatchEvent(new CustomEvent("daal-open-auth", { detail: { mode: "login" } }))}
+          className="mt-6 w-full rounded-xl bg-violet-600 px-5 py-3 font-bold">ورود / ثبت‌نام</button>
+        <Link href="/" className="mt-5 block text-sm text-cyan-300">بازگشت به سایت</Link>
+      </div>
+    </main>
+  );
+
   return (
     <main
       id="main-content"
@@ -593,19 +651,18 @@ ${
               <p className="mt-3 max-w-md text-sm leading-9 text-white/60">
                 {editing
                   ? "اطلاعات جدیدت رو ثبت کن تا راهنمایی‌های بعدی دقیق‌تر باشن."
-                  : "قبل از اینکه گپ بزنیم، یکم باهات آشنا بشم. اسمت، شغلت و کسب‌وکارت رو بدونم، می‌تونم شخصی‌تر راهنماییت کنم."}
+                  : "قبل از اینکه گپ بزنیم، چند سؤال درباره شغل و کسب‌وکارت دارم تا بهتر راهنماییت کنم."}
               </p>
             </div>
 
             <div className="space-y-3 text-xs text-white/65">
-              <p>✦ بدون رمز عبور و کد تأیید</p>
+              <p>✦ متصل به حساب کاربری شما</p>
               <p>✦ گفت‌وگوی متناسب با اطلاعات اولیه شما</p>
               <p>✦ آشنایی با خدمات و پکیج‌های دال آپس</p>
             </div>
 
             <p className="max-w-sm text-xs leading-7 text-amber-100/65">
-              حالت تست: اطلاعات فرم فقط در حافظه همین صفحه
-              نگه داشته می‌شن و به سرور ارسال نمی‌شن.
+              اطلاعات این فرم در حساب کاربری شما ذخیره می‌شود.
             </p>
           </div>
 
@@ -631,13 +688,6 @@ ${
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
-              <InputField
-                label="نام و نام خانوادگی"
-                required
-                value={form.fullName}
-                onChange={(v) => change("fullName", v)}
-                placeholder="مثلاً علی محمدی"
-              />
 
               <InputField
                 label="شماره تماس"
@@ -730,9 +780,7 @@ ${
                   required
                   className="mt-1 accent-cyan-400"
                 />
-                موافقم اطلاعات فرم به‌صورت موقت در همین
-                صفحه برای شخصی‌سازی گفت‌وگوی آزمایشی
-                استفاده بشه.
+                موافقم اطلاعات تکمیلی در حسابم ذخیره شود و برای شخصی‌سازی مشاوره استفاده شود.
               </label>
             )}
 
@@ -748,11 +796,10 @@ ${
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 type="submit"
+                disabled={saving}
                 className="min-h-12 flex-1 rounded-xl bg-gradient-to-l from-violet-600 to-blue-600 px-6 py-3 text-sm font-bold shadow-lg shadow-violet-900/30 transition hover:brightness-110"
               >
-                {editing
-                  ? "ذخیره تغییرات و بازگشت به چت"
-                  : "ثبت اطلاعات و شروع گفت‌وگو ←"}
+                {saving ? "در حال ذخیره..." : editing ? "ذخیره تغییرات و بازگشت به چت" : "ثبت اطلاعات و شروع گفت‌وگو ←"}
               </button>
 
               {editing && (
@@ -770,8 +817,7 @@ ${
             </div>
 
             <p className="mt-4 text-center text-[11px] leading-6 text-white/35">
-              فقط نام و شماره تماس ضروریه؛ بقیه اطلاعات
-              اختیاریه.
+              فقط شماره تماس ضروریه؛ بقیه اطلاعات اختیاریه.
             </p>
           </form>
         </div>
