@@ -4,8 +4,8 @@ import { db } from "@/lib/db";
 import { getSessionCustomerId } from "@/lib/session";
 
 const uuidPattern =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  
 function badRequest(error: string) {
   return NextResponse.json({ error }, { status: 400 });
 }

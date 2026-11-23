@@ -29,6 +29,7 @@ type Message = {
   role: "user" | "assistant";
   content: string;
   time: number;
+  status?: "sending" | "sent" | "failed";
 };
 
 const emptyProfile: Profile = {
@@ -325,6 +326,8 @@ function SelectField({
   );
 }
 
+const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 function formatTime(time: number) {
   return new Date(time).toLocaleTimeString("fa-IR", {
     hour: "2-digit",
@@ -347,6 +350,7 @@ export default function ConsultationPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [chatBusy, setChatBusy] = useState(false);
+  const [gholamTyping, setGholamTyping] = useState(false);
   const [chatError, setChatError] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -429,10 +433,11 @@ export default function ConsultationPage() {
         content: item.content,
         time: new Date(item.created_at).getTime(),
       }));
-      nextId.current = loaded.length + 1;
+      nextId.current = Math.max(nextId.current, loaded.length + 1);
       activeConversation.current = id;
       setConversationId(id);
       setMessages(loaded.length ? loaded : profile ? [welcomeMessage(profile)] : []);
+      setGholamTyping(false);
       setMobileMenuOpen(false);
       stickToBottom.current = true;
     } catch (error) {
@@ -514,40 +519,80 @@ ${
     if (!profile || busyRef.current) return;
     const content = value.trim();
     if (!content) return;
+
     busyRef.current = true;
     setChatBusy(true);
     setChatError("");
+    setDraft("");
+    setMobileMenuOpen(false);
+    stickToBottom.current = true;
+
+    const localId = nextId.current++;
+    const startedAt = Date.now();
+    setMessages((previous) => [
+      ...previous,
+      { id: localId, role: "user", content, time: startedAt, status: "sending" },
+    ]);
+
     try {
       let id = activeConversation.current;
       if (!id) {
-        const create = await fetch("/api/consult/conversations", { method: "POST" });
+        const create = await fetch("/api/consult/conversations", {
+          method: "POST",
+          credentials: "same-origin",
+        });
         const created = await create.json();
-        if (!create.ok) throw new Error(created.error || "ساخت گفت‌وگو انجام نشد.");
+        if (!create.ok || !created.conversation?.id) {
+          throw new Error(created.error || "ساخت گفت‌وگو انجام نشد.");
+        }
         id = created.conversation.id;
         activeConversation.current = id;
         setConversationId(id);
         setConversations((previous) => [created.conversation, ...previous]);
       }
+
       const answer = answerQuestion(content, profile);
       const response = await fetch("/api/consult/messages", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: id, userContent: content, assistantContent: answer }),
+        body: JSON.stringify({
+          conversationId: id,
+          userContent: content,
+          assistantContent: answer,
+        }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "پیام ذخیره نشد.");
-      const time = Date.now();
-      setMessages((previous) => [...previous,
-        { id: nextId.current++, role: "user", content, time },
-        { id: nextId.current++, role: "assistant", content: answer, time },
+
+      setMessages((previous) =>
+        previous.map((message) =>
+          message.id === localId ? { ...message, status: "sent" } : message
+        )
+      );
+      setConversations((previous) =>
+        previous.map((item) =>
+          item.id === id && item.title === "گفت‌وگوی جدید"
+            ? { ...item, title: content.slice(0, 70) }
+            : item
+        )
+      );
+
+      setGholamTyping(true);
+      const responseDelay = Math.min(1500, Math.max(850, 700 + answer.length * 1.1));
+      await wait(Math.max(0, responseDelay - (Date.now() - startedAt)));
+      setGholamTyping(false);
+      setMessages((previous) => [
+        ...previous,
+        { id: nextId.current++, role: "assistant", content: answer, time: Date.now() },
       ]);
-      setConversations((previous) => previous.map((item) =>
-        item.id === id && item.title === "گفت‌وگوی جدید" ? { ...item, title: content.slice(0, 70) } : item
-      ));
-      setDraft("");
-      setMobileMenuOpen(false);
-      stickToBottom.current = true;
     } catch (error) {
+      setGholamTyping(false);
+      setMessages((previous) =>
+        previous.map((message) =>
+          message.id === localId ? { ...message, status: "failed" } : message
+        )
+      );
       setChatError(error instanceof Error ? error.message : "ذخیره پیام انجام نشد.");
     } finally {
       busyRef.current = false;
@@ -560,6 +605,7 @@ ${
     activeConversation.current = null;
     setConversationId(null);
     setMessages([welcomeMessage(profile)]);
+    setGholamTyping(false);
     setDraft("");
     setChatError("");
     setMobileMenuOpen(false);
@@ -1121,8 +1167,8 @@ ${
                       key={message.id}
                       className={`flex items-end gap-2 ${
                         message.role === "user"
-                          ? "justify-start"
-                          : "justify-end"
+                          ? "justify-start animate-[gholam-user-in_.46s_cubic-bezier(.16,1,.3,1)_both]"
+                          : "justify-end animate-[gholam-in_.42s_cubic-bezier(.16,1,.3,1)_both]"
                       }`}
                     >
                       {message.role === "assistant" && (
@@ -1140,12 +1186,34 @@ ${
                           {message.content}
                         </p>
 
-                        <p className="mt-2 text-left text-[10px] text-white/35">
-                          {formatTime(message.time)}
-                        </p>
+                        <div className="mt-2 flex items-center justify-end gap-1.5 text-[10px] text-white/55" dir="ltr">
+                          <span>{formatTime(message.time)}</span>
+                          {message.role === "user" && (
+                            <span
+                              aria-label={message.status === "sending" ? "در حال ارسال" : message.status === "failed" ? "ارسال ناموفق" : "ذخیره‌شده"}
+                              title={message.status === "sending" ? "در حال ارسال" : message.status === "failed" ? "ارسال ناموفق" : "ذخیره‌شده در تاریخچه"}
+                              className={message.status === "failed" ? "text-rose-300" : message.status === "sending" ? "text-white/50" : "text-cyan-200"}
+                            >
+                              {message.status === "sending" ? "◷" : message.status === "failed" ? "!" : "✓✓"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
+                  {gholamTyping && (
+                    <div className="mt-5 flex items-end justify-end gap-2 animate-[gholam-in_.42s_cubic-bezier(.16,1,.3,1)_both]" role="status" aria-live="polite">
+                      <Avatar />
+                      <div className="rounded-[22px] rounded-bl-md border border-white/10 bg-[#1a1730] px-4 py-3">
+                        <span className="text-xs text-white/70">غلام در حال آماده‌کردن پاسخه</span>
+                        <span className="mr-2 inline-flex items-center gap-1" aria-hidden="true">
+                          {[0, 1, 2].map((index) => (
+                            <span key={index} className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-300" style={{ animationDelay: `${index * 140}ms` }} />
+                          ))}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1197,6 +1265,19 @@ ${
           </div>
         </div>
       )}
+      <style jsx global>{`
+        @keyframes gholam-in {
+          from { opacity: 0; transform: translate3d(-10px, 12px, 0) scale(.97); filter: blur(2px); }
+          to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+        }
+        @keyframes gholam-user-in {
+          from { opacity: 0; transform: translate3d(16px, 14px, 0) scale(.96); filter: blur(2px); }
+          to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [class*="gholam-in"], [class*="gholam-user-in"] { animation: none !important; }
+        }
+      `}</style>
     </main>
   );
 }
