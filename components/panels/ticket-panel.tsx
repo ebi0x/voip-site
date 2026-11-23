@@ -1,6 +1,5 @@
 "use client";
-
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { CloseIcon, DocIcon } from "@/components/icons";
 import {
   sendTicket,
@@ -8,15 +7,12 @@ import {
   type TicketValues,
 } from "@/lib/support-api";
 import type { OpenOptions } from "./panel-context";
-
 type Props = {
   onClose: () => void;
   initial: OpenOptions;
 };
-
 type Errors = Partial<Record<"name" | "contact" | "message", string>>;
 type Status = "idle" | "sending" | "sent" | "failed";
-
 const topics = [
   {
     id: "tech",
@@ -43,22 +39,16 @@ const topics = [
     description: "موضوعات دیگر",
   },
 ] as const;
-
 const fieldClass =
   "w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-sm text-[var(--text)] outline-none transition-all duration-200 placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:bg-[var(--surface-strong)]";
-
 function validate(values: TicketValues): Errors {
   const errors: Errors = {};
-
   if (values.name.trim().length < 2) {
     errors.name = "لطفاً نام و نام خانوادگی رو وارد کن.";
   }
-
   const contact = values.contact.trim();
-
   const emailValid =
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
-
   const normalizedPhone = contact
     .replace(/[۰-۹]/g, (digit) =>
       String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))
@@ -66,23 +56,18 @@ function validate(values: TicketValues): Errors {
     .replace(/[٠-٩]/g, (digit) =>
       String("٠١٢٣٤٥٦٧٨٩".indexOf(digit))
     );
-
   const phoneValid =
     /^[+]?[0-9\s()-]+$/.test(normalizedPhone) &&
     normalizedPhone.replace(/\D/g, "").length >= 7;
-
   if (!emailValid && !phoneValid) {
     errors.contact = "شماره تماس یا ایمیل معتبر وارد کن.";
   }
-
   if (values.message.trim().length < 10) {
     errors.message =
       "لطفاً درخواستت رو کمی کامل‌تر توضیح بده.";
   }
-
   return errors;
 }
-
 function CheckIcon() {
   return (
     <svg
@@ -100,7 +85,6 @@ function CheckIcon() {
     </svg>
   );
 }
-
 function ArrowIcon() {
   return (
     <svg
@@ -119,25 +103,51 @@ function ArrowIcon() {
     </svg>
   );
 }
-
 export function TicketPanel({
   onClose,
   initial,
 }: Props) {
   const isConsult = initial.topic === "consult";
-
   const [values, setValues] = useState<TicketValues>({
     name: "",
     contact: "",
     topic: initial.topic ?? "tech",
     message: initial.message ?? "",
   });
-
+  const [account, setAccount] = useState<{
+    authenticated: boolean;
+    fullName: string;
+    phone: string;
+    email: string;
+  } | null>(null);
+  useEffect(() => {
+    let active = true;
+    fetch("/api/auth/me", { credentials: "same-origin", cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return { authenticated: false, fullName: "", phone: "", email: "" };
+        const data = await response.json();
+        return {
+          authenticated: Boolean(data.authenticated && data.customer),
+          fullName: String(data.customer?.full_name ?? ""),
+          phone: String(data.customer?.phone ?? ""),
+          email: String(data.customer?.email ?? ""),
+        };
+      })
+      .then((info) => { if (active) setAccount(info); })
+      .catch(() => { if (active) setAccount({ authenticated: false, fullName: "", phone: "", email: "" }); });
+    return () => { active = false; };
+  }, []);
+  const signedIn = Boolean(account?.authenticated);
+  const savedContact = account?.phone?.trim() || account?.email?.trim() || "";
+  const needContact = signedIn && !savedContact;
+  const effectiveValues: TicketValues = {
+    ...values,
+    name: signedIn ? account?.fullName ?? "" : values.name,
+    contact: signedIn ? (savedContact || values.contact) : values.contact,
+  };
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>("idle");
-
   const connected = supportBackend.connected;
-
   function update<K extends keyof TicketValues>(
     key: K,
     value: TicketValues[K]
@@ -146,54 +156,48 @@ export function TicketPanel({
       ...previous,
       [key]: value,
     }));
-
     setErrors((previous) => ({
       ...previous,
       [key]: undefined,
     }));
-
     if (status === "failed") {
       setStatus("idle");
     }
   }
-
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
-
     if (status === "sending") return;
-
-    const found = validate(values);
+    if (account === null) return;
+    if (!signedIn) {
+      setStatus("failed");
+      return;
+    }
+    const found = validate(effectiveValues);
     setErrors(found);
-
     const firstInvalid = (
       ["name", "contact", "message"] as const
     ).find((key) => found[key]);
-
     if (firstInvalid) {
       document
         .getElementById(`ticket-${firstInvalid}`)
         ?.focus();
       return;
     }
-
     setStatus("sending");
-
     try {
       const result = await sendTicket({
-        ...values,
-        name: values.name.trim(),
-        contact: values.contact.trim(),
-        message: values.message.trim(),
+        ...effectiveValues,
+        name: effectiveValues.name.trim(),
+        contact: effectiveValues.contact.trim(),
+        message: effectiveValues.message.trim(),
       });
-
       setStatus(result.ok ? "sent" : "failed");
     } catch {
       setStatus("failed");
     }
   }
-
   return (
     <div
       dir="rtl"
@@ -215,41 +219,33 @@ export function TicketPanel({
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
       >
         <div className="absolute -right-32 -top-36 h-[330px] w-[330px] rounded-full bg-[var(--accent)] opacity-10 blur-[100px]" />
-
         <div className="absolute -bottom-32 -left-32 h-[300px] w-[300px] rounded-full bg-[var(--accent-2)] opacity-[0.07] blur-[100px]" />
       </div>
-
       {/* Header */}
       <header className="relative z-10 shrink-0 border-b border-[var(--border)] bg-[var(--surface)] px-5 py-5 backdrop-blur-xl sm:px-7">
         <div className="flex items-center gap-4">
           <div className="relative flex h-13 w-13 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br from-[var(--cta-a)] to-[var(--accent-2)] text-white shadow-[0_12px_30px_-12px_var(--accent)]">
             <DocIcon className="h-6 w-6" />
           </div>
-
           <div className="min-w-0 flex-1">
             <div className="mb-1.5 flex items-center gap-2">
               <span className="text-[10px] font-semibold tracking-wider text-[var(--accent-2)]">
                 DAAL OPS
               </span>
-
               <span className="h-1 w-1 rounded-full bg-[var(--text-muted)]" />
-
               <span className="text-[10px] text-[var(--text-muted)]">
                 SUPPORT CENTER
               </span>
             </div>
-
             <h2 className="text-lg font-bold sm:text-xl">
               {isConsult
                 ? "درخواست مشاوره"
                 : "ثبت تیکت پشتیبانی"}
             </h2>
-
             <p className="mt-1 text-[11px] leading-6 text-[var(--text-muted)]">
               درخواستت رو با جزئیات برامون بنویس.
             </p>
           </div>
-
           <button
             type="button"
             onClick={onClose}
@@ -260,7 +256,6 @@ export function TicketPanel({
           </button>
         </div>
       </header>
-
       {/* Scrollable content */}
       <div
         className="
@@ -280,16 +275,13 @@ export function TicketPanel({
             <div className="flex h-20 w-20 items-center justify-center rounded-[26px] border border-emerald-400/25 bg-emerald-400/10 text-emerald-400">
               <CheckIcon />
             </div>
-
             <h3 className="mt-6 text-xl font-bold">
               درخواستت ثبت شد!
             </h3>
-
             <p className="mt-3 max-w-sm text-sm leading-8 text-[var(--text-muted)]">
               درخواستت با موفقیت به سامانه پشتیبانی
               ارسال شد.
             </p>
-
             <button
               type="button"
               onClick={onClose}
@@ -311,21 +303,17 @@ export function TicketPanel({
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--surface-strong)] text-xs font-bold text-[var(--accent-2)]">
                   01
                 </span>
-
                 <h3 className="text-sm font-bold">
                   موضوع درخواست
                 </h3>
               </div>
-
               <p className="mb-4 text-xs leading-6 text-[var(--text-muted)]">
                 کدوم موضوع به درخواستت نزدیک‌تره؟
               </p>
-
               <div className="grid grid-cols-2 gap-3">
                 {topics.map((topic) => {
                   const selected =
                     values.topic === topic.id;
-
                   return (
                     <button
                       key={topic.id}
@@ -363,7 +351,6 @@ export function TicketPanel({
                         >
                           {topic.icon}
                         </span>
-
                         <span
                           className={`
                             flex h-4 w-4 items-center
@@ -390,11 +377,9 @@ export function TicketPanel({
                           )}
                         </span>
                       </div>
-
                       <span className="mt-3 text-xs font-bold leading-5">
                         {topic.title}
                       </span>
-
                       <span className="mt-1 text-[10px] leading-5 text-[var(--text-muted)]">
                         {topic.description}
                       </span>
@@ -403,20 +388,38 @@ export function TicketPanel({
                 })}
               </div>
             </div>
-
             {/* Personal information */}
             <div>
               <div className="mb-4 flex items-center gap-2">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--surface-strong)] text-xs font-bold text-[var(--accent-2)]">
                   02
                 </span>
-
                 <h3 className="text-sm font-bold">
                   اطلاعات ارتباطی
                 </h3>
               </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
+                            {account === null ? (
+                <p className="text-xs text-[var(--text-muted)]">در حال بررسی حساب کاربری...</p>
+              ) : signedIn ? (
+                <div className="space-y-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+                  <p className="text-xs text-[var(--text-muted)]">اطلاعات از حساب کاربری شما دریافت شد.</p>
+                  <p className="text-sm font-semibold">{account.fullName}</p>
+                  {savedContact ? (
+                    <p dir="ltr" className="text-left text-sm text-[var(--text-muted)]">{savedContact}</p>
+                  ) : (
+                    <div>
+                      <label htmlFor="ticket-contact" className="mb-2 block text-xs font-medium">شماره تماس</label>
+                      <input id="ticket-contact" type="tel" dir="ltr" value={values.contact}
+                        onChange={(event) => update("contact", event.target.value)}
+                        placeholder="09123456789" className={`${fieldClass} text-left`}
+                        aria-invalid={Boolean(errors.contact)} />
+                      {errors.contact && <p className="mt-2 text-xs text-rose-400">{errors.contact}</p>}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+<div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label
                     htmlFor="ticket-name"
@@ -427,7 +430,6 @@ export function TicketPanel({
                       *
                     </span>
                   </label>
-
                   <input
                     id="ticket-name"
                     type="text"
@@ -441,14 +443,12 @@ export function TicketPanel({
                     placeholder="مثلاً علی محمدی"
                     className={fieldClass}
                   />
-
                   {errors.name && (
                     <p className="mt-2 text-[11px] text-rose-400">
                       {errors.name}
                     </p>
                   )}
                 </div>
-
                 <div>
                   <label
                     htmlFor="ticket-contact"
@@ -459,7 +459,6 @@ export function TicketPanel({
                       *
                     </span>
                   </label>
-
                   <input
                     id="ticket-contact"
                     type="text"
@@ -473,7 +472,6 @@ export function TicketPanel({
                     placeholder="09123456789"
                     className={`${fieldClass} text-left`}
                   />
-
                   {errors.contact && (
                     <p className="mt-2 text-[11px] text-rose-400">
                       {errors.contact}
@@ -481,20 +479,20 @@ export function TicketPanel({
                   )}
                 </div>
               </div>
+                  <p className="col-span-full text-xs text-amber-300">برای ثبت و پیگیری تیکت ابتدا وارد حساب کاربری شوید.</p>
+                </>
+              )}
             </div>
-
             {/* Description */}
             <div>
               <div className="mb-4 flex items-center gap-2">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--surface-strong)] text-xs font-bold text-[var(--accent-2)]">
                   03
                 </span>
-
                 <h3 className="text-sm font-bold">
                   توضیحات درخواست
                 </h3>
               </div>
-
               <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition focus-within:border-[var(--accent)]">
                 <textarea
                   id="ticket-message"
@@ -518,12 +516,10 @@ export function TicketPanel({
                     [&::-webkit-scrollbar]:hidden
                   "
                 />
-
                 <div className="flex items-center justify-between border-t border-[var(--border)] px-4 py-2.5">
                   <span className="text-[10px] text-[var(--text-muted)]">
                     حداقل ۱۰ کاراکتر
                   </span>
-
                   <span
                     dir="ltr"
                     className="text-[10px] text-[var(--text-muted)]"
@@ -532,14 +528,12 @@ export function TicketPanel({
                   </span>
                 </div>
               </div>
-
               {errors.message && (
                 <p className="mt-2 text-[11px] text-rose-400">
                   {errors.message}
                 </p>
               )}
             </div>
-
             {/* Connection notice */}
             {!connected && (
               <div
@@ -550,12 +544,10 @@ export function TicketPanel({
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-400/10 text-amber-300">
                     !
                   </span>
-
                   <div>
                     <p className="text-xs font-bold">
                       سامانه ثبت تیکت هنوز فعال نشده
                     </p>
-
                     <p className="mt-1.5 text-[11px] leading-6 text-[var(--text-muted)]">
                       می‌تونی فرم رو تکمیل و طراحی
                       اون رو بررسی کنی، اما فعلاً
@@ -566,22 +558,20 @@ export function TicketPanel({
                 </div>
               </div>
             )}
-
             {status === "failed" && (
               <div
                 role="alert"
                 className="rounded-2xl border border-rose-400/20 bg-rose-400/[0.06] p-4 text-xs leading-7 text-[var(--text)]"
               >
-                ارسال درخواست انجام نشد. اطلاعات
+                ارسال انجام نشد یا هنوز وارد حساب کاربری نشده‌اید. اطلاعات
                 واردشده در فرم باقی مونده و می‌تونی
                 بعداً دوباره تلاش کنی.
               </div>
             )}
-
             {/* Submit */}
             <button
               type="submit"
-              disabled={status === "sending"}
+              disabled={status === "sending" || account === null || !signedIn}
               className="
                 group flex min-h-13 w-full
                 items-center justify-center gap-3
@@ -606,14 +596,12 @@ export function TicketPanel({
                   {isConsult
                     ? "ثبت درخواست مشاوره"
                     : "ارسال درخواست پشتیبانی"}
-
                   <span className="transition-transform group-hover:-translate-x-1">
                     <ArrowIcon />
                   </span>
                 </>
               )}
             </button>
-
             <p className="text-center text-[11px] leading-6 text-[var(--text-muted)]">
               اطلاعات تماس فقط برای رسیدگی به
               درخواستت دریافت می‌شه.
