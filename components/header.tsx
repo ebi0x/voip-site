@@ -191,7 +191,7 @@ export function Header() {
       }`}
     >
       {/* DESKTOP */}
-      <div className="mx-auto hidden h-20 max-w-[1440px] items-center justify-between gap-3 px-5 lg:flex xl:px-8">
+      <div className="mx-auto hidden h-20 max-w-[1600px] items-center justify-between gap-2 px-4 lg:flex xl:gap-3 xl:px-6 2xl:gap-5 2xl:px-8">
         <a
           href="#top"
           aria-label="DAAL OPS؛ بالای صفحه"
@@ -202,7 +202,7 @@ export function Header() {
 
         <nav
           aria-label="منوی اصلی"
-          className="nav-capsule flex min-w-0 shrink items-center gap-0 px-3 py-2 xl:px-4"
+          className="nav-capsule flex min-w-0 shrink items-center gap-0 px-3 py-2 xl:gap-1 xl:px-4 xl:py-2.5 2xl:gap-2 2xl:px-5 2xl:py-3"
         >
           {nav.map((item) => (
             <a
@@ -211,7 +211,7 @@ export function Header() {
               aria-current={
                 active === item.id ? "true" : undefined
               }
-              className="nav-link relative whitespace-nowrap text-[15px] font-medium text-[var(--nav-text)] transition-colors hover:text-[var(--nav-text-hover)] aria-[current=true]:text-[var(--nav-text-hover)] xl:text-base"
+              className="nav-link relative whitespace-nowrap text-[15px] font-semibold text-[var(--nav-text)] transition-colors hover:text-[var(--nav-text-hover)] aria-[current=true]:text-[var(--nav-text-hover)] xl:text-[16px] 2xl:text-[18px]"
             >
               {item.label}
             </a>

@@ -12,7 +12,7 @@ function getSecret() {
     throw new Error("SESSION_SECRET is missing or too short");
   }
 
-  return new TextEncoder().encode(secret);
+  return new TextEncoder().encode(secret);            
 }
 
 export async function createSession(customerId: string) {

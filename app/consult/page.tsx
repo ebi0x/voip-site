@@ -22,6 +22,8 @@ type Profile = {
   interest: string;
 };
 
+type Conversation = { id: string; title: string; created_at: string };
+
 type Message = {
   id: number;
   role: "user" | "assistant";
@@ -342,12 +344,18 @@ export default function ConsultationPage() {
   const [draft, setDraft] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [chatBusy, setChatBusy] = useState(false);
+  const [chatError, setChatError] = useState("");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(1);
   const stickToBottom = useRef(true);
+  const activeConversation = useRef<string | null>(null);
+  const busyRef = useRef(false);
 
   const firstName =
     profile?.fullName.trim().split(/\s+/)[0] ?? "دوست من";
@@ -377,7 +385,7 @@ export default function ConsultationPage() {
         setForm(savedProfile);
         if (savedProfile.phone.trim()) {
           setProfile(savedProfile);
-          setMessages((previous) => previous.length ? previous : [welcomeMessage(savedProfile)]);
+          void loadConversations(savedProfile);
         }
       } catch { if (active) setAuthenticated(false); }
       finally { if (active) setAuthLoading(false); }
@@ -386,6 +394,51 @@ export default function ConsultationPage() {
     window.addEventListener("daal-auth-changed", loadCustomer);
     return () => { active = false; window.removeEventListener("daal-auth-changed", loadCustomer); };
   }, []);
+
+  async function loadConversations(data: Profile) {
+    try {
+      const response = await fetch("/api/consult/conversations", { cache: "no-store" });
+      if (!response.ok) throw new Error("دریافت تاریخچه انجام نشد.");
+      const result = await response.json();
+      const items: Conversation[] = result.conversations ?? [];
+      setConversations(items);
+      if (items.length) {
+        await openConversation(items[0].id);
+      } else {
+        activeConversation.current = null;
+        setConversationId(null);
+        setMessages([welcomeMessage(data)]);
+      }
+    } catch (error) {
+      setChatError(error instanceof Error ? error.message : "خطا در دریافت تاریخچه.");
+    }
+  }
+
+  async function openConversation(id: string) {
+    if (busyRef.current) return;
+    setChatError("");
+    try {
+      const response = await fetch(`/api/consult/messages?conversationId=${encodeURIComponent(id)}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("دریافت پیام‌های گفت‌وگو انجام نشد.");
+      const result = await response.json();
+      const loaded: Message[] = (result.messages ?? []).map((item: {
+        sender: string; content: string; created_at: string;
+      }, index: number) => ({
+        id: index + 1,
+        role: item.sender === "user" ? "user" : "assistant",
+        content: item.content,
+        time: new Date(item.created_at).getTime(),
+      }));
+      nextId.current = loaded.length + 1;
+      activeConversation.current = id;
+      setConversationId(id);
+      setMessages(loaded.length ? loaded : profile ? [welcomeMessage(profile)] : []);
+      setMobileMenuOpen(false);
+      stickToBottom.current = true;
+    } catch (error) {
+      setChatError(error instanceof Error ? error.message : "خطا در دریافت پیام‌ها.");
+    }
+  }
 
   function change<K extends keyof Profile>(
     field: K,
@@ -450,50 +503,65 @@ ${
       setEditing(false);
       setMobileMenuOpen(false);
       if (messages.length === 0) setMessages([welcomeMessage(saved)]);
+      await loadConversations(saved);
       stickToBottom.current = true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "ثبت اطلاعات انجام نشد.");
     } finally { setSaving(false); }
   }
 
-  function sendMessage(value = draft) {
-    if (!profile) return;
-
+  async function sendMessage(value = draft) {
+    if (!profile || busyRef.current) return;
     const content = value.trim();
     if (!content) return;
-
-    const time = Date.now();
-
-    const userMessage: Message = {
-      id: nextId.current++,
-      role: "user",
-      content,
-      time,
-    };
-
-    const assistantMessage: Message = {
-      id: nextId.current++,
-      role: "assistant",
-      content: answerQuestion(content, profile),
-      time,
-    };
-
-    stickToBottom.current = true;
-
-    setMessages((previous) => [
-      ...previous,
-      userMessage,
-      assistantMessage,
-    ]);
-
-    setDraft("");
-    setMobileMenuOpen(false);
+    busyRef.current = true;
+    setChatBusy(true);
+    setChatError("");
+    try {
+      let id = activeConversation.current;
+      if (!id) {
+        const create = await fetch("/api/consult/conversations", { method: "POST" });
+        const created = await create.json();
+        if (!create.ok) throw new Error(created.error || "ساخت گفت‌وگو انجام نشد.");
+        id = created.conversation.id;
+        activeConversation.current = id;
+        setConversationId(id);
+        setConversations((previous) => [created.conversation, ...previous]);
+      }
+      const answer = answerQuestion(content, profile);
+      const response = await fetch("/api/consult/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId: id, userContent: content, assistantContent: answer }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "پیام ذخیره نشد.");
+      const time = Date.now();
+      setMessages((previous) => [...previous,
+        { id: nextId.current++, role: "user", content, time },
+        { id: nextId.current++, role: "assistant", content: answer, time },
+      ]);
+      setConversations((previous) => previous.map((item) =>
+        item.id === id && item.title === "گفت‌وگوی جدید" ? { ...item, title: content.slice(0, 70) } : item
+      ));
+      setDraft("");
+      setMobileMenuOpen(false);
+      stickToBottom.current = true;
+    } catch (error) {
+      setChatError(error instanceof Error ? error.message : "ذخیره پیام انجام نشد.");
+    } finally {
+      busyRef.current = false;
+      setChatBusy(false);
+    }
   }
 
   function newChat() {
-    if (!profile) return;
+    if (!profile || busyRef.current) return;
+    activeConversation.current = null;
+    setConversationId(null);
     setMessages([welcomeMessage(profile)]);
     setDraft("");
+    setChatError("");
     setMobileMenuOpen(false);
     stickToBottom.current = true;
   }
@@ -872,6 +940,15 @@ ${
               </button>
             </div>
 
+            <p className="mb-3 mt-6 text-xs font-semibold text-white/50">تاریخچه گفت‌وگوها</p>
+            <div className="max-h-44 space-y-1 overflow-y-auto">
+              {conversations.map((item) => (
+                <button key={item.id} type="button" onClick={() => void openConversation(item.id)}
+                  className={`block w-full truncate rounded-xl px-3 py-2 text-right text-xs transition ${conversationId === item.id ? "bg-violet-500/20 text-violet-100" : "text-white/60 hover:bg-white/10"}`}>
+                  {item.title}
+                </button>
+              ))}
+            </div>
             <p className="mb-3 mt-7 text-xs font-semibold text-white/50">
               شروع سریع
             </p>
@@ -962,6 +1039,14 @@ ${
                   ویرایش پروفایل
                 </button>
 
+                <div className="max-h-32 space-y-1 overflow-y-auto">
+                  {conversations.map((item) => (
+                    <button key={item.id} type="button" onClick={() => void openConversation(item.id)}
+                      className="block w-full truncate rounded-xl border border-white/10 p-3 text-right text-xs text-white/70">
+                      {item.title}
+                    </button>
+                  ))}
+                </div>
                 {topics.map((topic) => (
                   <button
                     key={topic.title}
@@ -1067,10 +1152,11 @@ ${
 
             {/* Composer */}
             <div className="shrink-0 border-t border-white/10 bg-[#100d26]/95 px-3 pb-[max(10px,env(safe-area-inset-bottom))] pt-3 sm:px-8 sm:py-4">
+              {chatError && <p role="alert" className="mx-auto mb-2 max-w-3xl rounded-xl bg-rose-500/10 p-3 text-xs text-rose-200">{chatError}</p>}
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
-                  sendMessage();
+                  void sendMessage();
                 }}
                 className="mx-auto flex w-full max-w-3xl items-end gap-2 rounded-[28px] border border-white/10 bg-[#1b1734] p-2 shadow-[0_12px_36px_rgba(0,0,0,.18)] transition-colors focus-within:border-violet-400/50 sm:gap-3 sm:p-2.5"
               >
@@ -1097,10 +1183,10 @@ ${
 
                 <button
                   type="submit"
-                  disabled={!draft.trim()}
+                  disabled={!draft.trim() || chatBusy}
                   className="flex h-12 min-w-[66px] shrink-0 items-center justify-center rounded-[20px] bg-gradient-to-l from-violet-600 to-blue-600 px-4 text-sm font-bold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 sm:min-w-[74px]"
                 >
-                  ارسال
+                  {chatBusy ? "ذخیره..." : "ارسال"}
                 </button>
               </form>
 
