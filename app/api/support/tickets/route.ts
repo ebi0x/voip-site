@@ -25,9 +25,9 @@ export async function POST(request:NextRequest) {
     const name=String(customer.full_name??"").trim();
     const savedPhone=String(customer.phone??"").trim();
     const savedEmail=String(customer.email??"").trim();
-    const supplied=typeof input?.contact==="string"?input.contact.trim():"";
-    const contact=savedPhone||supplied||savedEmail;
-    const phone=contact.replace(/[۰-۹٠-٩]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".includes(d)?"۰۱۲۳۴۵۶۷۸۹".indexOf(d):"٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+    const supplied:string=typeof input?.contact==="string"?input.contact.trim():"";
+    const contact:string=savedPhone||supplied||savedEmail;
+    const phone=contact.replace(/[۰-۹٠-٩]/g,(d:string)=>String("۰۱۲۳۴۵۶۷۸۹".includes(d)?"۰۱۲۳۴۵۶۷۸۹".indexOf(d):"٠١٢٣٤٥٦٧٨٩".indexOf(d)));
     const valid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)||(/^[+]?[0-9\s()-]+$/.test(phone)&&phone.replace(/\D/g,"").length>=7);
     if(!name||!valid) return NextResponse.json({error:"اطلاعات تماس حساب را تکمیل کنید"},{status:400});
     const description=`نام: ${name}\nتماس: ${contact}\n\n${message}`;

@@ -34,6 +34,7 @@ export function PanelProvider({ children }: { children: ReactNode }) {
   const [closing, setClosing] = useState(false);
 
   const open = useCallback((next: PanelId, opts: OpenOptions = {}) => {
+    if (next === "chat") return;
     window.clearTimeout(closeTimer.current);
     if (
       !dialogRef.current?.open &&

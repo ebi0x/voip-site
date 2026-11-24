@@ -23,12 +23,12 @@ export function Showcase() {
               صف تماس، اپراتورها و گزارش‌ها.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <a
+              {false && (<a
                 href="/consult"
                 className="btn-cta inline-flex items-center justify-center rounded-2xl px-7 py-3 text-base font-medium text-white"
               >
                 درخواست مشاوره رایگان
-              </a>
+              </a>)}
               <a href="#services" className="text-sm font-medium text-[var(--accent-2)] hover:underline">
                 مشاهده خدمات
               </a>

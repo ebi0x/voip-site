@@ -101,14 +101,14 @@ function MobileHero() {
             <ArrowIcon className="h-5 w-5" />
           </a>
 
-          <a
+          {false && (<a
             href="/consult"
             className="flex min-h-14 items-center justify-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-5 text-sm font-bold text-[var(--text)]"
           >
             <HeadsetIcon className="h-5 w-5 text-[var(--accent-2)]" />
 
             از غلام راهنمایی بگیر
-          </a>
+          </a>)}
         </div>
 
         {/* Services grid */}
@@ -188,14 +188,14 @@ function DesktopHero() {
                 مشاهده پکیج‌ها
               </a>
 
-              <a
+              {false && (<a
                 href="/consult"
                 className="glass-card group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-3.5 text-base font-medium text-[var(--text)]"
               >
                 <HeadsetIcon className="h-5 w-5 text-[var(--accent-2)]" />
 
                سؤالی داری؟ از غلام بپرس
-              </a>
+              </a>)}
             </div>
 
             <FeatureList className="animate-fade-up anim-delay-4 mt-10 flex flex-col gap-4 lg:hidden" />

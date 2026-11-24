@@ -234,7 +234,7 @@ export function ContactPanel({
             )}
           </div>
 
-          {/* CTA section */}
+          {/* CTA section */}{false && (
           <div className="relative mt-5 overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface-strong)] p-5 backdrop-blur-xl sm:p-6">
             <div
               aria-hidden="true"
@@ -279,7 +279,7 @@ export function ContactPanel({
             </div>
           </div>
 
-          {/* Footer */}
+          )}{/* Footer */}
           <div className="mt-6 flex items-center justify-center gap-2 text-[11px] text-[var(--text-muted)]">
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-2)]" />
             DAAL OPS — Infrastructure & Technology

@@ -1,3 +1,4 @@
+import TicketReplyNotice from "@/components/ticket-reply-notice";
 
 import type { Metadata } from "next";
 import AuthPopup from "@/components/AuthPopup";
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
 
         <AuthPopup />
+      <TicketReplyNotice />
       </body>
     </html>
   );

@@ -51,12 +51,12 @@ export function Footer() {
             </p>
 
             <div className="mt-5 flex flex-col gap-3">
-              <Link
+              {false && (<Link
                 href="/consult"
                 className="btn-cta inline-flex min-h-[48px] items-center justify-center rounded-xl px-5 text-sm font-bold text-white"
               >
                 از غلام بپرس
-              </Link>
+              </Link>)}
 
               <a
                 href="#support"

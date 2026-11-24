@@ -271,15 +271,16 @@ export function Header() {
                     )}
                   </div>
 
-                  <Link
+                  {false && (<Link
                     href="/consult"
                     role="menuitem"
                     onClick={() => setAccountOpen(false)}
                     className="mt-2 flex min-h-10 items-center rounded-xl px-3 text-sm transition hover:bg-[var(--surface)]"
                   >
                     مشاور غلام
-                  </Link>
+                  </Link>)}
 
+                  <a href="/dashboard/tickets" className="dt-account-link">تیکت‌ها و مکالمات من</a>
                   <button
                     type="button"
                     role="menuitem"
@@ -355,12 +356,12 @@ export function Header() {
             )}
           </button>
 
-          <Link
+          {false && (<Link
             href="/consult"
             className="btn-cta inline-flex min-h-10 items-center justify-center rounded-xl px-3 text-xs font-bold text-white"
           >
             از غلام بپرس
-          </Link>
+          </Link>)}
 
           <button
             type="button"
@@ -409,6 +410,7 @@ export function Header() {
               </div>
             )}
 
+            {customer && (<a href="/dashboard/tickets" className="dt-account-link">تیکت‌ها و مکالمات من</a>)}
             <div className="grid grid-cols-2 gap-3">
               {nav
                 .filter((item) =>
@@ -445,13 +447,13 @@ export function Header() {
                 سوالات متداول
               </a>
 
-              <Link
+              {false && (<Link
                 href="/consult"
                 onClick={() => setMenuOpen(false)}
                 className="rounded-full border border-[var(--border)] px-4 py-2.5 text-xs text-[var(--text)]"
               >
                 مشاور غلام
-              </Link>
+              </Link>)}
             </div>
 
             <div className="mt-5">

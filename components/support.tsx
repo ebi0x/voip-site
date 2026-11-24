@@ -37,7 +37,7 @@ export function Support() {
 
           <ul className="mt-7 space-y-3">
             <li>
-              <Link
+              {false && (<Link
                 href="/consult"
                 className="flex min-h-[104px] items-center gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4"
               >
@@ -53,7 +53,7 @@ export function Support() {
                   </span>
                 </span>
                 <span aria-hidden="true">←</span>
-              </Link>
+              </Link>)}
             </li>
 
             <li>
@@ -98,13 +98,13 @@ export function Support() {
             </li>
           </ul>
 
-          <PanelTrigger
+          {false && (<PanelTrigger
             panel="chat"
             className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 text-sm font-medium text-[var(--accent-2)]"
           >
             <ChatIcon className="h-4 w-4" />
             باز کردن پنجره چت
-          </PanelTrigger>
+          </PanelTrigger>)}
         </div>
       </div>
 
@@ -129,19 +129,19 @@ export function Support() {
 
               <p className="mt-5 max-w-lg text-sm leading-8 text-[var(--text-muted)] sm:text-base">
                 برای دریافت راهنمایی، رفع مشکلات یا مشاوره
-                می‌توانید از طریق چت، تیکت یا بخش تماس
+                می‌توانید از طریق تیکت یا بخش تماس
                 با ما در ارتباط باشید.
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
-                <PanelTrigger
+                {false && (<PanelTrigger
                   panel="chat"
                   className="btn-cta group inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-medium text-white"
                 >
                   <ChatIcon className="h-5 w-5" />
                   چت آنلاین
                   <ArrowIcon className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
-                </PanelTrigger>
+                </PanelTrigger>)}
 
                 <PanelTrigger
                   panel="ticket"

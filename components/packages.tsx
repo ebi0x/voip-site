@@ -199,12 +199,12 @@ export function Packages() {
 
         <p className="mt-6 text-center text-xs leading-7 text-[var(--text-muted)]">
           برای انتخاب پکیج نیاز به راهنمایی داری؟{" "}
-          <a
+          {false && (<a
             href="/consult"
             className="font-bold text-[var(--accent-2)] underline underline-offset-4"
           >
             از غلام بپرس
-          </a>
+          </a>)}
         </p>
       </div>
     </section>

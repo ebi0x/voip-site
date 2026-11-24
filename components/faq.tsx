@@ -137,12 +137,12 @@ export function Faq() {
               غلام می‌تونه برای شناخت خدمات راهنماییت کنه.
             </p>
 
-            <Link
+            {false && (<Link
               href="/consult"
               className="btn-cta mt-4 inline-flex min-h-[50px] w-full items-center justify-center rounded-xl px-5 text-sm font-bold text-white"
             >
               از غلام بپرس
-            </Link>
+            </Link>)}
           </div>
         </div>
       </div>
