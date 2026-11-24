@@ -48,3 +48,10 @@ next-env.d.ts
 next-env.d.ts
 next-env.d.ts
 .env*
+node_modules/
+.next/
+*.bak
+*.tsbuildinfo
+*.log
+*.dump
+*.key
