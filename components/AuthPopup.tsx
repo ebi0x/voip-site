@@ -460,7 +460,7 @@ export default function AuthPopup() {
                     نام کاربری
                   </span>
 
-                  <input
+                  <input name="username"
                     required
                     minLength={3}
                     maxLength={40}

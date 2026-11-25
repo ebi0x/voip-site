@@ -23,14 +23,19 @@ export async function POST(request:NextRequest) {
     const customer=customerResult.rows[0];
     if(!customer) return NextResponse.json({error:"حساب یافت نشد"},{status:404});
     const name=String(customer.full_name??"").trim();
+    // DAAL-V62-OPTIONAL-CONTACT
     const savedPhone=String(customer.phone??"").trim();
     const savedEmail=String(customer.email??"").trim();
     const supplied:string=typeof input?.contact==="string"?input.contact.trim():"";
-    const contact:string=savedPhone||supplied||savedEmail;
-    const phone=contact.replace(/[۰-۹٠-٩]/g,(d:string)=>String("۰۱۲۳۴۵۶۷۸۹".includes(d)?"۰۱۲۳۴۵۶۷۸۹".indexOf(d):"٠١٢٣٤٥٦٧٨٩".indexOf(d)));
-    const valid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)||(/^[+]?[0-9\s()-]+$/.test(phone)&&phone.replace(/\D/g,"").length>=7);
-    if(!name||!valid) return NextResponse.json({error:"اطلاعات تماس حساب را تکمیل کنید"},{status:400});
-    const description=`نام: ${name}\nتماس: ${contact}\n\n${message}`;
+    function validContact(value:string){
+      if(!value||value.length>120)return false;
+      const normalized=value.replace(/[۰-۹٠-٩]/g,(d:string)=>String("۰۱۲۳۴۵۶۷۸۹".includes(d)?"۰۱۲۳۴۵۶۷۸۹".indexOf(d):"٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)||(/^[+]?[0-9\s()-]+$/.test(normalized)&&normalized.replace(/\D/g,"").length>=7);
+    }
+    if(supplied&&!validContact(supplied))return NextResponse.json({error:"شماره تماس یا ایمیل جایگزین معتبر نیست."},{status:400});
+    if(!name)return NextResponse.json({error:"نام حساب را تکمیل کنید."},{status:400});
+    const contact=supplied||[savedPhone,savedEmail].find(validContact)||"";
+    const description=`نام: ${name}\nتماس: ${contact||"ثبت نشده؛ پاسخ از طریق پنل"}\n\n${message}`;
     const result=await db.query(`INSERT INTO support_tickets (customer_id,subject,description,priority,status,name,contact,topic,message) VALUES ($1,$2,$3,'normal','open',$4,$5,$6,$7) RETURNING id,ticket_number,status`,[customerId,topics[topic],description,name,contact,topic,message]);
     return NextResponse.json({ok:true,ticket:result.rows[0]},{status:201});
   }catch(e){console.error(e);return NextResponse.json({error:"ثبت تیکت انجام نشد"},{status:500});}

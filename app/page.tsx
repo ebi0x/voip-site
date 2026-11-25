@@ -1,3 +1,4 @@
+import { CustomerAuthRedirect as DaalLandingAuthRedirect } from "@/components/customer-dashboard/auth-redirect";
 import { Faq } from "@/components/faq";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -11,12 +12,12 @@ import { Showcase } from "@/components/showcase";
 import { Support } from "@/components/support";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
-export default function Home() {
+function Home() {
   return (
     <PanelProvider>
       <ScrollRail />
 
-      <Header />
+      <Header /><DaalLandingAuthRedirect />
 
       <main id="main-content" className="min-w-0 flex-1">
         <Hero />
@@ -39,4 +40,9 @@ export default function Home() {
       <MobileBottomNav />
     </PanelProvider>
   );
+}
+// DAAL-V62-PUBLIC-LANDING
+export default async function DaalCustomerLandingPage() {
+
+  return <><Home /></>;
 }
