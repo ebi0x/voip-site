@@ -1307,3 +1307,191 @@ label {
     scroll-margin-top: 80px;
   }
 }
+/* DAAL-V73-POLISH | shared interaction system; no timers or JS animation loops */
+:where(button,[role="button"],a,input,select,textarea,summary):focus-visible{outline:2px solid var(--cd-accent,var(--ow-accent,#62d8ea));outline-offset:3px}
+:where(button:not(:disabled),[role="button"],summary){cursor:pointer}
+:where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) :is(button,a,summary){transition:background-color .19s ease,color .19s ease,border-color .19s ease,box-shadow .22s ease,transform .19s cubic-bezier(.2,.75,.25,1),filter .19s ease}
+@media(hover:hover) and (pointer:fine){
+ :where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) :is(button:not(:disabled),a,summary):hover{filter:brightness(1.10)}
+ :where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) :is(.cd-primary,.cd-secondary,.ops-btn,.dp-btn,.dpt-button,.dpt-chat-link,.dt-send,.v73-groups button,.v73-presets button,.v73-admin-detail):not(:disabled):hover{transform:translateY(-2px);box-shadow:0 5px 16px #0003}
+ :where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) :is(.dt-icon,.cd-icon-button,.ops-icon-btn):not(:disabled):hover svg{transform:scale(1.13)}
+ :where(.cd-root,.ops-shell) :is(.cd-metric,.cd-catalog-card,.ops-queue,.ow-ticket-row,.v73-ticket):hover{border-color:color-mix(in srgb,var(--cd-accent,#65d5bd) 42%,transparent)}
+}
+:where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) :is(button:not(:disabled),a,summary):active{transform:scale(.98)}
+:where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) :is(button:disabled){cursor:not-allowed}
+:where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) :is(input:not([type=checkbox]):not([type=file]),textarea,select){transition:border-color .2s,box-shadow .2s}
+:where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) :is(input:not([type=checkbox]):not([type=file]),textarea,select):focus{border-color:var(--cd-accent,#61cfb8);box-shadow:0 0 0 3px color-mix(in srgb,var(--cd-accent,#61cfb8) 13%,transparent)}
+/* Native landing and login buttons: subtle response, without overriding layout/entrance animations. */
+@media(hover:hover) and (pointer:fine){body :where(button:not(:disabled),a[role=button]):hover{filter:brightness(1.07)}}
+body:not(:has(.cd-root,.ops-shell)) :where(button:not(:disabled),a[role=button]){transition-property:background-color,border-color,color,box-shadow,filter;transition-duration:.18s}
+/* Compact ticket bubbles. Greater specificity than V7.2's legacy chat rules. */
+.dt-chat.dt-v53 .dt-messages{padding:clamp(12px,2vw,26px) clamp(14px,3.6vw,64px);gap:12px;min-width:0;overscroll-behavior:contain}
+.dt-chat.dt-v53 .dt-line{gap:10px}
+.dt-chat.dt-v53 .dt-bubble{box-sizing:border-box;width:fit-content;min-width:0;max-width:min(76%,500px);padding:11px 15px 9px;gap:6px;overflow-wrap:anywhere;line-height:1.8}
+.dt-chat.dt-v53 .dt-bubble p{font-family:Tahoma,Arial,sans-serif;font-size:14px;font-weight:400;line-height:1.95;white-space:pre-wrap;overflow-wrap:anywhere}
+.dt-chat.dt-v53 .dt-bubble[data-payment-event]{width:fit-content;min-width:0;max-width:min(88%,370px);padding:13px 15px;border-radius:15px;border-color:color-mix(in srgb,#65d5bd 45%,var(--dt-line));background:color-mix(in srgb,var(--dt-panel) 86%,#65d5bd 14%)}
+.dt-chat.dt-v53 .dt-bubble[data-payment-event] .dpt-event-label{font-size:13px;line-height:1.65;letter-spacing:0}
+.dt-chat.dt-v53 .dt-bubble .dpt-chat-link{width:auto;max-width:100%;min-height:40px;margin:7px 0 3px;padding:7px 15px;font-size:12px;line-height:1.6;white-space:normal;align-self:flex-start}
+.dt-chat.dt-v53 .dt-bubble footer{font-size:11px;gap:6px}
+.dt-chat.dt-v53 .dt-title{min-width:0}.dt-chat.dt-v53 .dt-title small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dt-chat.dt-v53 .dt-head{padding:11px clamp(12px,2vw,24px);gap:10px}
+.dt-chat.dt-v53 .dpt-current{padding:10px clamp(12px,2vw,24px);gap:12px}.dt-chat.dt-v53 .dpt-current .dpt-button{min-height:40px;padding:8px 15px;font-size:12px}.dt-chat.dt-v53 .dpt-current strong{font-weight:600}
+.dt-chat.dt-v53 .dt-compose{padding:10px clamp(10px,2vw,22px) 8px;gap:10px}.dt-chat.dt-v53 .dt-compose textarea{font-family:Tahoma,Arial,sans-serif;font-weight:400;font-size:15px}.dt-chat.dt-v53 .dt-file{max-width:100%;min-width:0;overflow-wrap:anywhere}.dt-chat.dt-v53 .dt-file span{min-width:0;overflow-wrap:anywhere}
+.dt-chat.dt-v53 .v73-status-select{font:inherit;font-size:11px;max-width:130px;min-width:0;padding:7px 8px;border-radius:9px;background:var(--dt-panel);color:var(--dt-text);border:1px solid var(--dt-line)}
+.dt-chat.dt-v53 .v73-chat-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 16px;background:var(--dt-panel);border-bottom:1px solid var(--dt-line);flex:none;font-size:12px}.v73-chat-tools label{display:flex;gap:8px;align-items:center;color:var(--dt-muted)}
+/* Customer: simple two-level taxonomy, consistent panels, visible primary action. */
+.cd-root .cd-v73-request{max-width:900px;margin:0 auto;padding:clamp(16px,3vw,30px);display:grid;gap:26px;min-width:0}
+.cd-v73-request section{display:grid;gap:13px;min-width:0}.cd-v73-request section+section{border-top:1px solid var(--cd-line);padding-top:24px}
+.v73-step{display:flex;align-items:center;gap:11px}.v73-step>span{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:color-mix(in srgb,var(--cd-primary) 18%,var(--cd-panel));color:var(--cd-accent);font-weight:700;flex:none}.v73-step h2{font-size:17px;line-height:1.55;margin:0}.v73-step p{font-size:13px;color:var(--cd-muted);margin:3px 0 0;line-height:1.7}
+.v73-groups,.v73-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.v73-groups button,.v73-presets button{display:flex;align-items:center;gap:10px;min-width:0;min-height:54px;text-align:right;border:1px solid var(--cd-line);background:var(--cd-raised);color:var(--cd-text);border-radius:13px;padding:12px 14px;font:inherit;font-size:14px;line-height:1.6}.v73-groups button strong{flex:1;font-weight:600}.v73-groups button>span,.v73-presets button>span{margin-inline-start:auto;color:var(--cd-accent);font-size:18px}.v73-groups button[aria-pressed=true],.v73-presets button[aria-pressed=true]{border-color:var(--cd-accent);background:color-mix(in srgb,var(--cd-primary) 17%,var(--cd-panel));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--cd-accent) 26%,transparent)}
+.v73-input{display:grid;gap:8px;color:var(--cd-text);font-size:13px}.v73-input textarea,.v73-input input{width:100%;min-width:0;box-sizing:border-box;font:inherit;font-size:15px;line-height:1.8;padding:12px 14px;border:1px solid var(--cd-line);border-radius:12px;color:var(--cd-text);background:var(--cd-bg);resize:vertical}.v73-input small,.v73-note{font-size:12px;color:var(--cd-muted)}.v73-extra{padding:12px 14px;border:1px solid var(--cd-line);border-radius:12px;font-size:13px}.v73-extra[open] .v73-input{margin-top:13px}.v73-form-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:1px solid var(--cd-line);padding-top:18px}.v73-form-footer>div{display:grid;gap:3px}.v73-form-footer small{color:var(--cd-muted);font-size:12px}.v73-form-footer button{min-height:46px}
+.cd-root .v73-tickets{display:grid;gap:12px;padding:8px 16px 16px}.cd-root .v73-ticket{border:1px solid var(--cd-line);border-radius:15px;background:var(--cd-raised);overflow:hidden;transition:border-color .2s,box-shadow .2s;min-width:0}.v73-ticket-main{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:13px;align-items:center;padding:15px}.v73-ticket-name{display:flex;align-items:center;gap:10px;min-width:0;color:inherit;text-decoration:none}.v73-ticket-name>span:nth-child(2){display:grid;gap:5px;min-width:0}.v73-ticket-name strong{font-size:14px;font-weight:600;overflow-wrap:anywhere;line-height:1.65}.v73-ticket-name small{font-size:11px;color:var(--cd-muted);justify-self:start}.v73-open{font-size:12px!important;min-height:40px!important;padding-inline:12px!important;white-space:nowrap}.v73-ticket-details{border-top:1px solid var(--cd-line);font-size:12px}.v73-ticket-details summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:10px 15px;color:var(--cd-muted)}.v73-ticket-details summary::-webkit-details-marker{display:none}.v73-ticket-details summary svg{transition:transform .2s}.v73-ticket-details[open] summary svg{transform:rotate(90deg)}.v73-ticket-details>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:8px 15px 16px;animation:v73-enter .2s ease both}.v73-ticket-details>div span{display:grid;gap:5px;border-inline-start:2px solid var(--cd-accent);padding-inline-start:10px}.v73-ticket-details small{font-size:11px;color:var(--cd-muted)}.v73-ticket-details strong{font-size:13px;font-weight:600}
+/* Staff list: one click opens conversation; details remain a secondary action. */
+.v73-admin-row{display:flex;gap:6px;align-items:stretch;min-width:0;margin-block:6px}.v73-admin-row .ow-ticket-row{flex:1;min-width:0;margin:0}.v73-admin-row .ow-ticket-row strong{overflow-wrap:anywhere;white-space:normal}.v73-admin-detail{flex:none;align-self:center;background:transparent;color:inherit;border:1px solid #829e993d;border-radius:9px;padding:8px;font:inherit;font-size:11px;min-height:36px}.ops-shell .ow-ticket-detail{line-height:1.8}.ops-shell .ow-ticket-detail h3{margin-bottom:9px}.ops-shell .ow-ticket-list{padding-block:8px}.ops-shell .ow-filter{gap:10px}.ops-shell .ow-ticket-row{padding:12px}.ops-shell .ops-panel-head{gap:12px}
+/* Payment: one clear action at a time. */
+.dpt-dialog .dp .dp-panel{display:grid;gap:16px}.dpt-dialog .dp .dp-detail-head{gap:14px}.dpt-dialog .dp .dp-status-banner{line-height:1.75}.dpt-dialog .dp .dp-actions{gap:10px}.dpt-dialog .dp .dp-btn,.dpt-dialog .dpt-button{min-height:42px;font-weight:600}.dpt-dialog[open] .dpt-dialog-body{animation:v73-enter .24s cubic-bezier(.16,1,.3,1) both}.dpt-dialog .dp .dp-description,.dpt-dialog .dp .dp-muted{line-height:1.75}.dpt-dialog .dp .dp-image img{object-fit:contain}.dpt-dialog .dp .dp-receipt-tabs{gap:8px;flex-wrap:wrap}.dpt-dialog .dp .dp-review{gap:12px}.dpt-dialog .dp .dp-check{line-height:1.8}.dpt-form{animation:v73-enter .22s ease both}
+@keyframes v73-enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:680px){.cd-root .cd-v73-request{gap:20px;padding:16px}.v73-ticket-main{grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:12px}.v73-ticket-main .v73-ticket-name{grid-column:1/-1}.v73-ticket-main .cd-status{justify-self:start}.v73-ticket-main .v73-open{justify-self:end}.cd-root .v73-tickets{padding:8px 10px 12px}.dt-chat.dt-v53 .dt-bubble{max-width:88%;padding:10px 12px 8px}.dt-chat.dt-v53 .dt-bubble[data-payment-event]{max-width:min(90%,340px)}.dt-chat.dt-v53 .dt-messages{padding:12px 10px;gap:10px}.dt-chat.dt-v53 .dt-head{gap:6px;padding:8px}.dt-chat.dt-v53 .dt-compose{gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px))}.dt-chat.dt-v53 .dt-compose textarea{font-size:16px}.dt-chat.dt-v53 .dpt-current{padding:8px 10px}.dt-chat.dt-v53 .dpt-current .dpt-button{padding:7px 10px;min-height:38px;font-size:11px}.dt-chat.dt-v53 .v73-chat-tools{padding:6px 10px}.v73-form-footer{flex-wrap:wrap}.v73-form-footer button{flex:1}.v73-groups button,.v73-presets button{font-size:13px;padding:10px;gap:7px}.v73-admin-row{gap:4px}.v73-admin-detail{padding:6px}.dpt-dialog .dp .dp-panel{gap:12px}}
+@media(max-width:380px){.v73-groups,.v73-presets{grid-template-columns:1fr}.v73-form-footer{display:grid;grid-template-columns:1fr}.v73-ticket-details>div{gap:8px}.v73-ticket-details strong{font-size:12px}.v73-admin-row .dt-row-state{flex-wrap:wrap}.dt-chat.dt-v53 .dpt-current strong{font-size:11px}}
+@media(prefers-reduced-motion:reduce){:where(.cd-root,.ops-shell,.dt-chat,.dp,.dpt-dialog) *,body :where(button,a[role=button]){animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.cd-root[data-motion=off] :is(button,a,summary,svg),.ops-shell[data-motion=false] :is(button,a,summary,svg),.cd-root[data-motion=off] .dpt-dialog-body,.ops-shell[data-motion=false] .dpt-dialog-body{animation:none!important;transition:none!important;transform:none!important}
+
+/* Override the more specific full-screen rule introduced by V7. */
+.cd-shell[data-chat-focus=true] .dt-chat.dt-v53 .dt-bubble{max-width:min(76%,500px)}
+.cd-shell[data-chat-focus=true] .dt-chat.dt-v53 .dt-bubble[data-payment-event]{max-width:min(88%,370px)}
+.dt-chat.dt-v53[data-side=admin] .dt-bubble p,.dt-chat.dt-v53[data-side=admin] .dt-compose textarea{font-family:Vazirmatn,Tahoma,Arial,sans-serif}
+@media(max-width:680px){.cd-shell[data-chat-focus=true] .dt-chat.dt-v53 .dt-bubble{max-width:88%}.cd-shell[data-chat-focus=true] .dt-chat.dt-v53 .dt-bubble[data-payment-event]{max-width:min(90%,340px)}}
+
+@media(hover:hover) and (pointer:fine){.cd-root .cd-nav-link:hover svg,.ops-shell .ops-nav-item:not(:disabled):hover svg{transform:translateX(-2px)}.cd-root .v73-ticket-name:hover strong{color:var(--cd-accent)}}
+
+/* DAAL-V75-TYPOGRAPHY-START */
+:root { --daal-ui-font: "Vazirmatn", Tahoma, Arial, sans-serif; }
+.dt-chat.dt-v53, .dt-chat.dt-v53 .dt-bubble p,
+.dt-chat.dt-v53 .dt-compose textarea, .dt-chat.dt-v53 .dt-bubble b,
+.dt-chat.dt-v53 .dt-bubble footer, .dt-chat.dt-v53 .dt-date {
+  font-family: var(--daal-ui-font) !important;
+  letter-spacing: 0;
+}
+.dt-chat.dt-v53 .dt-bubble p {
+  font-size: 16px; font-weight: 400; line-height: 1.95;
+  color: var(--dt-text, inherit); overflow-wrap: anywhere;
+}
+.dt-chat.dt-v53 .dt-bubble b {font-size: 12px; font-weight: 500; line-height: 1.65;}
+.dt-chat.dt-v53 .dt-bubble footer {font-size: 12px; font-weight: 400; line-height: 1.5;}
+.dt-chat.dt-v53 .dt-compose textarea {font-size: 16px; font-weight: 400; line-height: 24px;}
+.dt-chat.dt-v53 .dt-date {font-size: 12px; font-weight: 400;}
+.dt-chat.dt-v53 .dt-title strong {font-weight: 600;}
+@media(max-width:680px){
+ .dt-chat.dt-v53 .dt-bubble p {font-size:15px;line-height:1.85;}
+ .dt-chat.dt-v53 .dt-bubble footer {font-size:11px;}
+}
+/* Landing: clear body text and distinctive headings. */
+:root, :root[data-theme] {
+ --font-body: var(--daal-ui-font);
+ --font-display: "Estedad", "Vazirmatn", Tahoma, sans-serif;
+ --font-accent: var(--daal-ui-font);
+}
+body {font-family:var(--font-body); font-weight:400;}
+body h1,body h2 {font-family:var(--font-display);font-weight:700;letter-spacing:0;}
+.cd-root[data-font] {--cd-font:var(--daal-ui-font);font-family:var(--daal-ui-font)!important; font-weight:400;line-height:1.85;}
+.cd-root[data-font] :is(h1,h2,h3,h4,h5,h6,p,span,small,strong,b,a,button,input,textarea,select,label,li,dt,dd,th,td,summary,time,div,article,section,header,footer),
+.cd-root[data-font] [data-font-sample] {font-family:var(--daal-ui-font)!important;letter-spacing:0;}
+.cd-root[data-font] :is(h1,h2,h3,h4,h5,h6) {font-weight:600;}
+.cd-root[data-font] :is(.dt-bubble p,.dt-compose textarea) {font-weight:400;}
+/* DAAL-V75-TYPOGRAPHY-END */
+
+
+/* DAAL LANDING MOTION START */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  #main-content .js-reveal {
+    transform: translate3d(0,28px,0) scale(.985);
+    filter: none;
+    transition:
+      opacity 700ms cubic-bezier(.22,1,.36,1),
+      transform 700ms cubic-bezier(.22,1,.36,1);
+  }
+
+  #main-content .js-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  #main-content :is(button,a) {
+    transition:
+      translate 220ms ease,
+      scale 220ms ease,
+      background-color 250ms ease,
+      border-color 250ms ease,
+      box-shadow 250ms ease,
+      color 220ms ease;
+  }
+
+  #main-content :is(button,a):active {
+    scale: .97;
+  }
+
+  @media (hover:hover) and (pointer:fine) {
+
+    #main-content :is(.glass-card,article) {
+      transition:
+        translate 350ms cubic-bezier(.22,1,.36,1),
+        box-shadow 350ms ease,
+        border-color 350ms ease;
+    }
+
+    #main-content :is(.glass-card,article):hover {
+      translate: 0 -5px;
+      border-color: var(--accent);
+      box-shadow: 0 12px 36px
+        color-mix(in srgb,var(--accent) 13%,transparent);
+    }
+
+    #main-content :is(button,.btn-cta,a[role="button"]):hover {
+      translate: 0 -2px;
+    }
+
+    #main-content .btn-cta:hover {
+      box-shadow: 0 8px 28px
+        color-mix(in srgb,var(--accent) 30%,transparent);
+    }
+
+    #main-content article svg {
+      transition: scale 300ms ease;
+    }
+
+    #main-content article:hover svg {
+      scale: 1.08;
+    }
+
+    body:has(#main-content) header .nav-link::after {
+      content: "";
+      position: absolute;
+      bottom: -7px;
+      inset-inline: 0;
+      height: 2px;
+      border-radius: 10px;
+      background: var(--accent);
+      scale: 0 1;
+      transition: scale 300ms cubic-bezier(.22,1,.36,1);
+    }
+
+    body:has(#main-content) header .nav-link:hover::after {
+      scale: 1 1;
+    }
+  }
+
+  @media (max-width:767px) {
+    #main-content .js-reveal {
+      transform: translateY(16px);
+      transition-duration: 450ms;
+    }
+
+    #main-content .js-reveal.is-visible {
+      transform: none;
+    }
+  }
+}
+
+/* DAAL LANDING MOTION END */

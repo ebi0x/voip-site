@@ -50,3 +50,29 @@ body:has(.cd-root) .dt-hub{display:none!important}.cd-root[data-compact=on]{--cd
 
 /* DAAL-V62-ACCOUNT */
 .cd-account-v62{display:grid;gap:18px}.cd-account-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:18px}.cd-account-edit-grid h2{display:flex;align-items:center;gap:9px}.cd-account-edit-grid h2 svg{color:var(--cd-accent)}.cd-account-hint{color:var(--cd-muted);font-size:.88em;line-height:1.8}.cd-account-ok{color:#6ee7b7;font-size:.88em;line-height:1.8}.cd-password-username{position:absolute!important;width:1px!important;height:1px!important;clip-path:inset(50%);overflow:hidden;padding:0!important;pointer-events:none}.cd-account-edit-grid .cd-primary{justify-content:center}.cd-account-edit-grid input:focus{outline:2px solid var(--cd-accent);outline-offset:2px}@media(max-width:850px){.cd-account-edit-grid{grid-template-columns:1fr}}
+
+/* DAAL-V7-FOCUS: single viewport chat with a slide-out navigation drawer. */
+.cd-shell[data-chat-focus=true]{position:fixed;inset:0;display:block;height:var(--dt-viewport,100dvh);min-height:0;overflow:hidden;background:var(--cd-bg);z-index:40}
+.cd-shell[data-chat-focus=true] .cd-workspace{height:100%;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.cd-shell[data-chat-focus=true] .cd-top{position:relative;top:auto;flex:0 0 56px;height:56px;padding:0 16px;box-shadow:none;z-index:30}
+.cd-shell[data-chat-focus=true] .cd-mobile-menu{display:grid}
+.cd-shell[data-chat-focus=true] .cd-top-new{display:none}
+.cd-shell[data-chat-focus=true] .cd-main{display:flex;flex:1 1 0;min-height:0;min-width:0;width:100%;max-width:none;padding:0;margin:0;overflow:hidden}
+.cd-shell[data-chat-focus=true] .cd-page-enter{flex:1;display:flex;min-height:0;min-width:0;width:100%;animation:none;overflow:hidden}
+.cd-shell[data-chat-focus=true] .cd-chat-wrap{flex:1;display:flex;min-height:0;min-width:0;width:100%;overflow:hidden}
+.cd-shell[data-chat-focus=true] .cd-chat-wrap .dt-chat.dt-v53{flex:1;height:100%;min-height:0;max-height:none;min-width:0;border-radius:0;border:0;box-shadow:none}
+.cd-shell[data-chat-focus=true] .cd-footer{display:none}
+.cd-shell[data-chat-focus=true] .cd-sidebar{position:absolute;inset-block:0;right:0;width:min(300px,86vw);height:100%;padding:24px 16px 16px;transform:translateX(105%);visibility:hidden;transition:transform .28s ease,visibility .28s;z-index:50;box-shadow:-12px 0 50px #0005}
+.cd-shell[data-chat-focus=true] .cd-sidebar[data-open=true]{transform:none;visibility:visible}
+.cd-shell[data-chat-focus=true] .cd-mobile-overlay[data-open=true]{display:block;position:absolute;inset:0;background:#0008;z-index:49}
+.cd-root[data-compact=on] .cd-shell[data-chat-focus=true] .cd-brand-copy,.cd-root[data-compact=on] .cd-shell[data-chat-focus=true] .cd-nav-group>p,.cd-root[data-compact=on] .cd-shell[data-chat-focus=true] .cd-nav-link>span,.cd-root[data-compact=on] .cd-shell[data-chat-focus=true] .cd-nav-link .cd-count{display:initial}
+.cd-root[data-compact=on] .cd-shell[data-chat-focus=true] .cd-support-mini{display:grid}
+.cd-root[data-compact=on] .cd-shell[data-chat-focus=true] .cd-nav-link{justify-content:flex-start;padding-inline:12px}
+.cd-shell[data-chat-focus=true] .cd-collapse{display:none}
+.cd-shell[data-chat-focus=true] .dt-v53 .dt-head{padding:9px 16px;gap:10px}
+.cd-shell[data-chat-focus=true] .dt-v53 .dt-messages{padding:18px clamp(14px,4vw,56px);gap:8px;flex-direction:column}
+.cd-shell[data-chat-focus=true] .dt-v53 .dt-bubble{max-width:min(78%,720px)}
+.cd-shell[data-chat-focus=true] .dt-v53 .dt-compose{padding-inline:clamp(10px,4vw,56px)}
+.cd-shell[data-chat-focus=true] .dt-v53 .dt-caption{display:none}
+@media(max-width:600px){.cd-shell[data-chat-focus=true] .cd-top{height:48px;flex-basis:48px;padding:0 9px}.cd-shell[data-chat-focus=true] .dt-v53 .dt-head{padding:8px 9px;gap:6px}.cd-shell[data-chat-focus=true] .dt-v53 .dt-messages{padding:10px 10px}.cd-shell[data-chat-focus=true] .dt-v53 .dt-bubble{max-width:88%}}
+@media(prefers-reduced-motion:reduce){.cd-shell[data-chat-focus=true] .cd-sidebar{transition:none}}

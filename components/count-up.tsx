@@ -2,54 +2,56 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const toFa = (n: number) =>
-  Number.isFinite(n) ? n.toLocaleString("fa-IR") : "";
-
-/**
- * عدد را از صفر تا مقدار نهایی شمارش می‌کند، وقتی وارد دید می‌شود.
- * اگر کاربر کاهش حرکت خواسته باشد، مقدار نهایی فوراً نشان داده می‌شود.
- */
 export function CountUp({
   value,
-  duration = 1400,
+  duration = 1600,
 }: {
   value: number;
   duration?: number;
 }) {
-  const ref = useRef<HTMLSpanElement | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
   const [current, setCurrent] = useState(value);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (typeof IntersectionObserver === "undefined") return;
+
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      typeof IntersectionObserver === "undefined"
+    ) {
+      setCurrent(value);
+      return;
+    }
 
     let raf = 0;
-    let started = false;
+    let visible = false;
 
-    const run = () => {
-      setCurrent(0);
-      const start = performance.now();
-      const tick = (now: number) => {
-        const t = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - t, 3);
-        setCurrent(Math.round(value * eased));
-        if (t < 1) raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    };
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !visible) {
+        visible = true;
+        cancelAnimationFrame(raf);
+        setCurrent(0);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!started && entries.some((e) => e.isIntersecting)) {
-          started = true;
-          run();
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.4 },
-    );
+        const start = performance.now();
+
+        const tick = (now: number) => {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+
+          setCurrent(Math.round(value * eased));
+
+          if (t < 1) raf = requestAnimationFrame(tick);
+        };
+
+        raf = requestAnimationFrame(tick);
+      } else if (!entry.isIntersecting) {
+        visible = false;
+        cancelAnimationFrame(raf);
+        setCurrent(0);
+      }
+    }, { threshold: 0.2 });
+
     observer.observe(node);
 
     return () => {
@@ -60,7 +62,7 @@ export function CountUp({
 
   return (
     <span ref={ref} dir="ltr" className="tabular-nums">
-      {toFa(current)}
+      {current.toLocaleString("fa-IR")}
     </span>
   );
 }

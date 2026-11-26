@@ -5,7 +5,7 @@ export const dashboardFeatures = {
   account: true,
   settings: true,
   gholam: false, // existing /consult guide must be audited before enabling
-  billing: false,
+  billing: true,
   orders: false,
   wallet: false,
   renewals: false,
@@ -18,13 +18,7 @@ export const themes = [
   { id: 'ocean', label: 'آبی دریا', color: '#0ea5e9', second: '#7dd3fc' },
   { id: 'graphite', label: 'خاکستری نقره‌ای', color: '#94a3b8', second: '#e2e8f0' },
 ] as const;
-export const fonts = [
-  { id: 'rooyin', label: 'روئین (پیشنهادی)' },
-  { id: 'site', label: 'فونت اصلی سایت' },
-  { id: 'rounded', label: 'ایران گرد' },
-  { id: 'kharazmi', label: 'خوارزمی' },
-  { id: 'system', label: 'سیستمی' },
-] as const;
+export const fonts = [{ id: 'vazirmatn', label: 'وزیرمتن' }] as const;
 export const topics = [
   { id: 'tech', label: 'پشتیبانی فنی' },
   { id: 'purchase', label: 'درخواست خرید پکیج' },
@@ -36,3 +30,5 @@ export const services = [
   { id: 'network', name: 'شبکه و زیرساخت', icon: 'network', description: 'طراحی و پیاده‌سازی شبکه، سرورها و زیرساخت سازمانی.' },
   { id: 'devops', name: 'DevOps و اتوماسیون', icon: 'terminal', description: 'استقرار، اتوماسیون و بهینه‌سازی فرایندهای عملیاتی.' },
 ] as const;
+
+// DAAL-V7-PATCH

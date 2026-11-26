@@ -23,8 +23,8 @@ export function CustomerAuthRedirect(){
   const event=()=>void check();
   const open=()=>{if(previous!==true)intent=true;void check();};
   void check();window.addEventListener('daal-auth-changed',event);window.addEventListener('daal-open-auth',open);window.addEventListener('focus',event);document.addEventListener('visibilitychange',event);
-  const timer=window.setInterval(()=>{if(previous!==true)void check();},4000);
-  return()=>{alive=false;controller.abort();window.clearInterval(timer);window.removeEventListener('daal-auth-changed',event);window.removeEventListener('daal-open-auth',open);window.removeEventListener('focus',event);document.removeEventListener('visibilitychange',event);};
+  
+  return()=>{alive=false;controller.abort();window.removeEventListener('daal-auth-changed',event);window.removeEventListener('daal-open-auth',open);window.removeEventListener('focus',event);document.removeEventListener('visibilitychange',event);};
  },[]);
  if(signedIn===null)return null;
  return <div dir="rtl" className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-4 py-3 text-sm sm:px-8"><span className="text-[var(--text-muted)]">{signedIn?"به سایت DAAL OPS خوش آمدید.":"دسترسی به حساب مشتریان"}</span><a href={signedIn?"/dashboard":"/login"} className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 font-bold text-[var(--text)] transition hover:border-violet-400/60 focus-visible:outline-2 focus-visible:outline-violet-400">ورود به پنل مشتریان <span aria-hidden="true">←</span></a></div>;

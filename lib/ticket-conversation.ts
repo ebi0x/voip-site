@@ -8,17 +8,17 @@ export const fail=(error:string,status:number)=>NextResponse.json({error},{statu
 const ok=(value:unknown)=>NextResponse.json(value,{headers});
 const allowed=(req:NextRequest)=>req.headers.get("origin")===req.nextUrl.origin;
 const owner=(actor:Actor)=>actor.side==="customer"?actor.id:null;
-const columns=`id::text,sender,sender_name,body,created_at,read_at,file_name,file_type,octet_length(file_bytes) AS file_size`;
+const columns=`id::text,sender,sender_name,body,created_at,read_at,file_name,file_type,octet_length(file_bytes) AS file_size,payment_id::text,payment_event`;
 export async function threadGet(req:NextRequest,id:string,actor:Actor){
  if(actor.side==="customer"&&(!actor.id||!uuid.test(actor.id)))return fail("ابتدا وارد شوید",401);
  if(!uuid.test(id))return fail("شناسه نامعتبر",400);
  try{
-  const r=await db.query(`SELECT id,ticket_number,subject,status,created_at,updated_at,COALESCE(NULLIF(message,''),description) AS message,name FROM support_tickets WHERE id=$1 AND ($2::uuid IS NULL OR customer_id=$2)`,[id,owner(actor)]);
+  const r=await db.query(`SELECT id,ticket_number,subject,topic,status,created_at,updated_at,COALESCE(NULLIF(message,''),description) AS message,name FROM support_tickets WHERE id=$1 AND ($2::uuid IS NULL OR customer_id=$2)`,[id,owner(actor)]);
   if(!r.rowCount)return fail("تیکت پیدا نشد",404);
   const file=req.nextUrl.searchParams.get("file");
   if(file!==null){if(!/^\d{1,18}$/.test(file))return fail("شناسه فایل نامعتبر",400);const f=await db.query(`SELECT file_name,file_bytes FROM daal_ticket_messages WHERE ticket_id=$1 AND id=$2::bigint AND file_bytes IS NOT NULL`,[id,file]);if(!f.rowCount)return fail("فایل پیدا نشد",404);return new NextResponse(new Uint8Array(f.rows[0].file_bytes),{headers:{...headers,"Content-Type":"application/octet-stream","Content-Disposition":`attachment; filename*=UTF-8''${encodeURIComponent(f.rows[0].file_name)}`,"X-Content-Type-Options":"nosniff"}});}
   const before=req.nextUrl.searchParams.get("before");if(before!==null&&!/^\d{1,18}$/.test(before))return fail("شناسه نامعتبر",400);
-  const m=await db.query(`SELECT ${columns} FROM daal_ticket_messages WHERE ticket_id=$1 AND ($2::bigint IS NULL OR id<$2) ORDER BY id DESC LIMIT 101`,[id,before]);
+  const m=await db.query(`SELECT ${columns} FROM daal_ticket_messages WHERE ticket_id=$1 AND ($2::bigint IS NULL OR id<$2) ORDER BY daal_ticket_messages.id DESC LIMIT 101`,[id,before]);
   const messages=m.rows.slice(0,100).reverse().map((message: {sender:string;sender_name:string})=>actor.side==="customer"&&message.sender==="admin"?{...message,sender_name:"پشتیبانی DAAL OPS"}:message);return ok({ticket:r.rows[0],messages,hasMore:m.rows.length>100});
  }catch(e){console.error("Ticket thread",e);return fail("دریافت مکالمه ناموفق بود",503);}
 }
@@ -43,3 +43,9 @@ export async function threadPost(req:NextRequest,id:string,actor:Actor){
   }catch(e){await c.query("ROLLBACK");throw e;}finally{c.release();}
  }catch(e){console.error("Ticket send",e);return fail("ارسال انجام نشد. دوباره تلاش کنید.",503);}
 }
+
+// DAAL-V7-PATCH
+
+// DAAL-V71-PATCH
+
+// DAAL-V73-PATCH

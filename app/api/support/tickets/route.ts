@@ -1,3 +1,4 @@
+import {requestTitle} from "@/lib/customer-dashboard/ticket-presets";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSessionCustomerId } from "@/lib/session";
@@ -17,6 +18,9 @@ export async function POST(request:NextRequest) {
   try {
     const input = await request.json();
     const topic = typeof input?.topic === "string" ? input.topic : "";
+    const preset=typeof input?.preset==="string"?input.preset:"";
+    const presetTitle=requestTitle(topic,preset);
+    if(preset&&!presetTitle)return NextResponse.json({error:"عنوان درخواست با بخش انتخابی مطابقت ندارد."},{status:400});
     const message = typeof input?.message === "string" ? input.message.trim() : "";
     if (!Object.hasOwn(topics,topic) || message.length<10 || message.length>3000) return NextResponse.json({error:"اطلاعات نامعتبر است"},{status:400});
     const customerResult=await db.query(`SELECT id,full_name,phone,email FROM customers WHERE id=$1 AND password_hash IS NOT NULL LIMIT 1`,[customerId]);
@@ -36,7 +40,9 @@ export async function POST(request:NextRequest) {
     if(!name)return NextResponse.json({error:"نام حساب را تکمیل کنید."},{status:400});
     const contact=supplied||[savedPhone,savedEmail].find(validContact)||"";
     const description=`نام: ${name}\nتماس: ${contact||"ثبت نشده؛ پاسخ از طریق پنل"}\n\n${message}`;
-    const result=await db.query(`INSERT INTO support_tickets (customer_id,subject,description,priority,status,name,contact,topic,message) VALUES ($1,$2,$3,'normal','open',$4,$5,$6,$7) RETURNING id,ticket_number,status`,[customerId,topics[topic],description,name,contact,topic,message]);
+    const result=await db.query(`INSERT INTO support_tickets (customer_id,subject,description,priority,status,name,contact,topic,message) VALUES ($1,$2,$3,'normal','open',$4,$5,$6,$7) RETURNING id,ticket_number,status`,[customerId,presetTitle||topics[topic],description,name,contact,topic,message]);
     return NextResponse.json({ok:true,ticket:result.rows[0]},{status:201});
   }catch(e){console.error(e);return NextResponse.json({error:"ثبت تیکت انجام نشد"},{status:500});}
 }
+
+// DAAL-V73-PATCH

@@ -1,3 +1,5 @@
+import { Reveal } from "@/components/reveal";
+import { CountUp } from "@/components/count-up";
 import { PanelTrigger } from "@/components/panels/panel-trigger";
 
 const plans = [
@@ -5,7 +7,7 @@ const plans = [
     id: "basic",
     name: "پایه",
     description: "برای شروع کار",
-    price: "۱۴۹,۰۰۰",
+    price: 149000,
     features: [
       "۲۰۰ دقیقه تماس",
       "بدون شماره اختصاصی",
@@ -17,7 +19,7 @@ const plans = [
     id: "standard",
     name: "استاندارد",
     description: "برای کسب‌وکارهای کوچک",
-    price: "۲۹۹,۰۰۰",
+    price: 299000,
     features: [
       "۶۰۰ دقیقه تماس",
       "شماره اختصاصی",
@@ -30,7 +32,7 @@ const plans = [
     id: "pro",
     name: "حرفه‌ای",
     description: "برای کسب‌وکارهای متوسط",
-    price: "۴۹۹,۰۰۰",
+    price: 499000,
     features: [
       "۱۰۰۰ دقیقه تماس",
       "مرکز تماس",
@@ -42,7 +44,7 @@ const plans = [
     id: "vip",
     name: "VIP",
     description: "برای سازمان‌های بزرگ",
-    price: "۹۹۹,۰۰۰",
+    price: 999000,
     features: [
       "تماس نامحدود",
       "مرکز تماس پیشرفته",
@@ -95,8 +97,8 @@ export function Packages() {
 
         <div className="mt-8 md:mt-12">
           <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-            {plans.map((plan) => (
-              <li key={plan.id} className="min-w-0">
+            {plans.map((plan, index) => (
+              <Reveal as="li" key={plan.id} index={index} className="min-w-0">
                 <article
                   className={`
                     relative flex h-full flex-col
@@ -143,7 +145,7 @@ export function Packages() {
                         dir="ltr"
                         className="text-[28px] font-bold tracking-tight"
                       >
-                        {plan.price}
+                        <CountUp value={plan.price} duration={1800} />
                       </strong>
 
                       <span className="text-xs text-[var(--text-muted)]">
@@ -192,7 +194,7 @@ export function Packages() {
                     درخواست این پکیج
                   </PanelTrigger>
                 </article>
-              </li>
+              </Reveal>
             ))}
           </ul>
         </div>
